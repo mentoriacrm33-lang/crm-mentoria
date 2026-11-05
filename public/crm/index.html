@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#F8F7FD;color:#211638;font-family:'Nunito Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#8C6A2B}a:hover{color:#6E5321}
+button,input,select,textarea{font:inherit;color:inherit}
+input:disabled,select:disabled{background:#F6F4FA;color:#4A3F66;cursor:not-allowed}
+:focus-visible{outline:2px solid #B8892F;outline-offset:2px}
+aside :focus-visible{outline-color:#E6C88A}
+</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;min-height:100vh;background:#F8F7FD">
+<aside style="flex:1 1 210px;background:#0A0A0B;color:#FFFFFF;padding:22px 14px">
+<div style="position:sticky;top:22px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:10px;padding:0 6px">
+<svg width="32" height="32" viewBox="0 0 34 34" aria-hidden="true" style="flex:none"><circle cx="17" cy="17" r="15" fill="none" stroke="#C69749" stroke-width="2.5"></circle><circle cx="17" cy="17" r="8.5" fill="none" stroke="#C69749" stroke-width="2.5"></circle><circle cx="17" cy="17" r="3" fill="#E6C88A"></circle></svg>
+<div style="font-weight:900;font-size:20px;letter-spacing:-0.01em;white-space:nowrap">CRM Closer</div>
+</div>
+<nav aria-label="Menu principal" style="display:flex;flex-wrap:wrap;gap:6px">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6">
+<button onClick="{{ n.go }}" aria-current="{{ n.cur }}" style="flex:1 1 170px;display:flex;align-items:center;gap:12px;height:46px;padding:0 14px;border-radius:10px;border:1px solid {{ n.bd }};background:{{ n.bg }};color:{{ n.fg }};font-weight:700;font-size:15px;cursor:pointer;text-align:left">
+<img src="{{ n.icon }}" alt="" width="18" height="18" style="flex:none"><span style="flex:1">{{ n.label }}</span>
+<sc-if value="{{ n.hasCount }}"><span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#E5484D;color:#FFFFFF;font-size:12px;font-weight:900;display:grid;place-items:center">{{ n.count }}</span></sc-if>
+</button>
+</sc-for>
+</nav>
+<div style="display:flex;flex-direction:column;gap:10px;padding:14px 8px 0;border-top:1px solid #1E1F22">
+<button onClick="{{ goCfg }}" style="align-self:flex-start;background:transparent;border:0;padding:4px 0;color:#C9C6BE;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Closers e dados</button>
+<p style="margin:0;font-size:11.5px;line-height:1.45;color:#8C8880">Protótipo: dados salvos neste navegador. Produção requer backend.</p>
+</div>
+</div>
+</aside>
+<main style="flex:9999 1 680px;min-width:0;padding:26px clamp(16px,2.6vw,32px) 56px">
+<sc-if value="{{ banner.show }}">
+<div role="note" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:20px;padding:10px 14px;border-radius:10px;background:#FBF3E4;color:#5E4416;font-size:13px;font-weight:700">
+<span>Lead e closers de demonstração (fictícios).</span>
+<button onClick="{{ clearDemo }}" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #B8892F;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:13px;cursor:pointer">Remover demonstração</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.leads }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Leads</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Gestão do funil do lead até a conversão</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;flex:1 1 420px;justify-content:flex-end">
+<label style="position:relative;flex:1 1 260px;max-width:420px;display:block">
+<img src="{{ I.search }}" alt="" width="18" height="18" style="position:absolute;left:14px;top:14px;pointer-events:none">
+<input type="search" aria-label="Buscar por nome, telefone ou cidade" placeholder="Buscar por nome, telefone ou cidade..." value="{{ search }}" onChange="{{ onSearch }}" style="width:100%;height:46px;padding:0 14px 0 42px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14.5px">
+</label>
+<button onClick="{{ toggleNew }}" aria-expanded="{{ nlOpenStr }}" style="height:46px;padding:0 20px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap" style-hover="filter:brightness(1.06)"><img src="{{ I.plusInk }}" alt="" width="18" height="18">Novo lead</button>
+</div>
+</div>
+<sc-if value="{{ nlClosed }}"><sc-if value="{{ alerts.has }}">
+<div role="status" style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ alerts.list }}" as="a" hint-placeholder-count="2"><span style="display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:8px;background:{{ a.bg }};color:{{ a.fg }};font-size:13px;font-weight:800">{{ a.text }}</span></sc-for>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ nlOpen }}">
+<form onSubmit="{{ createLead }}" aria-label="Novo lead" noValidate="" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:18px;font-weight:900">Novo lead</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Nome *<input value="{{ f.nl_name }}" onChange="{{ on.nl_name }}" maxLength="120" autoComplete="off" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span id="lb-ph-nl">Telefone / WhatsApp *</span>
+<div style="position:relative">
+<div role="group" aria-labelledby="lb-ph-nl" style="display:flex;height:42px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;overflow:hidden" style-focus-within="border-color:#B8892F">
+<button type="button" onClick="{{ ddi.nl.toggle }}" aria-haspopup="listbox" aria-expanded="{{ ddi.nl.exp }}" aria-label="Código do país: {{ ddi.nl.name }}" style="flex:none;width:84px;height:100%;display:flex;align-items:center;gap:6px;padding:0 10px 0 12px;border:0;border-right:1px solid #E4DDEF;background:#F8F7FD;color:#211638;font-size:14px;font-weight:700;cursor:pointer"><span>{{ ddi.nl.codeLabel }}</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" style="margin-left:auto"><path d="M2 3.5l3 3 3-3" fill="none" stroke="#4A3F66" stroke-width="1.4"></path></svg></button>
+<input type="tel" aria-label="Número com DDD" value="{{ f.nl_phone }}" onChange="{{ on.nl_phone }}" placeholder="{{ ptype.nlPh }}" style="flex:1;min-width:0;height:100%;padding:0 12px;border:0;background:transparent;color:#211638;font-size:14px;outline:none">
+</div>
+<sc-if value="{{ ddi.nl.open }}">
+<div onClick="{{ ddi.stop }}" style="position:absolute;left:0;top:46px;z-index:70;width:min(300px,100%);min-width:260px;background:#FFFFFF;border:1px solid #E4DDEF;border-radius:10px;box-shadow:0 12px 32px rgba(10,10,11,0.16);padding:8px;display:flex;flex-direction:column;gap:6px">
+<input ref="{{ ddi.focusRef }}" aria-label="Buscar país ou código" placeholder="Digite o país ou o código" value="{{ ddi.q }}" onChange="{{ ddi.onQ }}" onKeyDown="{{ ddi.nl.onKey }}" style="height:38px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;font-weight:500;width:100%" style-focus="border-color:#B8892F;outline:none">
+<div role="listbox" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column">
+<sc-for list="{{ ddi.nl.items }}" as="c" hint-placeholder-count="0"><button type="button" role="option" aria-selected="{{ c.sel }}" onClick="{{ c.pick }}" style="flex:none;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;border:0;border-radius:6px;background:{{ c.bg }};color:#211638;font-size:14px;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#F4F0FB"><span style="width:48px;font-weight:700">{{ c.codeLabel }}</span><span>{{ c.name }}</span></button></sc-for>
+<sc-if value="{{ ddi.empty }}"><p style="margin:0;padding:10px;color:#6B6380;font-size:13px;font-weight:500">Nenhum país encontrado para “{{ ddi.q }}”.</p></sc-if>
+</div>
+</div>
+</sc-if>
+</div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">E-mail *<input type="email" value="{{ f.nl_email }}" onChange="{{ on.nl_email }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span style="display:flex;align-items:center;white-space:nowrap">Nacionalidade<span style="position:relative;display:inline-flex;margin-left:6px"><button type="button" onClick="{{ help.natNl.toggle }}" aria-expanded="{{ help.natNl.exp }}" aria-label="Como a nacionalidade é definida" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #B8892F;color:#8C6A2B;font-size:11.5px;font-weight:800;cursor:pointer;background:#FFFFFF;padding:0" style-hover="background:#FBF3E4">?</button><sc-if value="{{ help.natNl.open }}"><span role="tooltip" style="position:absolute;left:0;top:26px;z-index:70;width:240px;padding:10px 12px;border-radius:8px;background:#0A0A0B;color:#F4F1EA;font-size:12.5px;font-weight:500;line-height:1.45;white-space:normal;box-shadow:0 8px 24px rgba(10,10,11,0.25)">Preenchida automaticamente pelo código do país do telefone: +55 = Nacional; outro código = Internacional.</span></sc-if></span></span><div aria-live="polite" style="height:42px;padding:0 12px;border:1px solid #E4DDEF;border-radius:10px;background:#F8F7FD;color:#211638;font-size:14px;font-weight:600;display:flex;align-items:center">{{ ddi.nl.nat }}</div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>Cidade<span style="font-size:11.5px;font-weight:500;color:#6B6380;margin-left:4px">(opcional)</span></span><input value="{{ f.nl_city }}" onChange="{{ on.nl_city }}" placeholder="Cascavel - PR" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>Idade<span style="font-size:11.5px;font-weight:500;color:#6B6380;margin-left:4px">(opcional)</span></span><input type="number" min="0" max="120" value="{{ f.nl_age }}" onChange="{{ on.nl_age }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Origem *<select value="{{ f.nl_origin }}" onChange="{{ on.nl_origin }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"><option value="">Selecione</option><option value="Site">Site</option><option value="Instagram">Instagram</option><option value="Facebook">Facebook</option><option value="Google">Google</option><option value="WhatsApp">WhatsApp</option><option value="Indicação">Indicação</option><option value="Outro">Outro</option></select></label>
+<sc-if value="{{ nlRef.show }}"><div style="grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 14px;border:1px solid #E6C88A;border-radius:10px;background:#FBF3E4">
+<sc-if value="{{ nlRef.hasPhoto }}"><img src="{{ nlRef.photo }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none"></sc-if>
+<div style="flex:1 1 200px;min-width:0"><div style="font-size:14px;font-weight:800;color:#211638">{{ nlRef.title }}</div><div style="font-size:12.5px;color:#4A3F66">{{ nlRef.contact }}</div></div>
+<button type="button" onClick="{{ openRefNl }}" style="height:34px;padding:0 12px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:13px;cursor:pointer">{{ nlRef.btn }}</button>
+</div></sc-if>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>Foto (opcional)<span style="position:relative;display:inline-flex;vertical-align:middle"><button type="button" onClick="{{ help.nl.toggle }}" aria-expanded="{{ help.nl.exp }}" aria-label="Formatos de foto aceitos" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #B8892F;color:#8C6A2B;font-size:11.5px;font-weight:800;cursor:pointer;background:#FFFFFF;padding:0;margin-left:6px;vertical-align:middle" style-hover="background:#FBF3E4">?</button><sc-if value="{{ help.nl.open }}"><span role="tooltip" style="position:absolute;left:0;top:26px;z-index:70;width:220px;padding:10px 12px;border-radius:8px;background:#0A0A0B;color:#F4F1EA;font-size:12.5px;font-weight:500;line-height:1.45;box-shadow:0 8px 24px rgba(10,10,11,0.25)">Formatos aceitos: JPG, PNG ou WEBP.<br>Tamanho máximo: 5 MB.</span></sc-if></span></span>
+<div style="display:flex;align-items:center;gap:14px">
+<label aria-label="Escolher foto" style="position:relative;width:92px;height:92px;border-radius:50%;border:2px dashed #B8892F;background:#FBF3E4;display:grid;place-items:center;cursor:pointer;overflow:hidden;flex:none" style-hover="background:#F6E7C9">
+<sc-if value="{{ nlHasPhoto }}"><img src="{{ f.nl_photo }}" alt="Foto escolhida" style="width:100%;height:100%;object-fit:cover"></sc-if>
+<sc-if value="{{ nlNoPhoto }}"><span style="display:flex;flex-direction:column;align-items:center;gap:2px;color:#8C6A2B;font-size:12px;font-weight:800;text-align:center;line-height:1.2"><span style="font-size:22px;line-height:1">+</span>Adicionar<br>foto</span></sc-if>
+<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ photoNew }}" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+</label>
+<div style="display:flex;flex-direction:column;gap:8px;font-weight:600;color:#6B6380;font-size:12.5px"><sc-if value="{{ nlHasPhoto }}"><button type="button" onClick="{{ rmPhotoNew }}" style="align-self:flex-start;height:32px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:13px;cursor:pointer">Remover foto</button></sc-if></div>
+</div>
+</div>
+</div>
+<sc-if value="{{ errs.hasNl }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.nl }}</p></sc-if>
+<sc-if value="{{ dup.nl }}"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 14px;border:1px solid #F3C2C2;border-radius:10px;background:#FFF6F6">
+<sc-if value="{{ dup.hasPhoto }}"><img src="{{ dup.photo }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none"></sc-if>
+<sc-if value="{{ dup.noPhoto }}"><div aria-hidden="true" style="width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FBF3E4,#EBD7AE);color:#5E4416;font-weight:900;font-size:13px">{{ dup.initials }}</div></sc-if>
+<div style="flex:1 1 200px;min-width:0"><div style="font-size:14px;font-weight:800;color:#211638">{{ dup.name }}</div><div style="font-size:12.5px;color:#4A3F66">{{ dup.contact }}</div></div>
+<button type="button" onClick="{{ dup.view }}" style="height:36px;padding:0 16px;border:0;border-radius:8px;background:#1B7A42;color:#FFFFFF;font-weight:800;font-size:14px;cursor:pointer" style-hover="background:#16663A">Ver</button>
+</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<button type="submit" style="height:42px;padding:0 18px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Salvar lead</button>
+<button type="button" onClick="{{ toggleNew }}" style="height:42px;padding:0 16px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14px;cursor:pointer">Cancelar</button>
+</div>
+</form>
+</sc-if>
+<sc-if value="{{ nlClosed }}">
+<div role="group" aria-label="Filtros" style="display:flex;flex-wrap:wrap;gap:10px">
+<sc-for list="{{ filters }}" as="fl" hint-placeholder-count="7">
+<button onClick="{{ fl.onClick }}" aria-pressed="{{ fl.pressed }}" style="height:44px;padding:0 16px;border-radius:10px;border:1px solid {{ fl.bd }};background:{{ fl.bg }};color:#211638;font-weight:800;font-size:14.5px;cursor:pointer;display:flex;gap:9px;align-items:center;white-space:nowrap"><img src="{{ fl.icon }}" alt="" width="18" height="18">{{ fl.label }}<span style="font-size:12px;font-weight:800;color:{{ fl.cfg }}">{{ fl.count }}</span></button>
+</sc-for>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;overflow:hidden">
+<div style="overflow-x:auto">
+<table style="width:100%;min-width:1140px;border-collapse:collapse;font-size:14.5px">
+<thead><tr style="background:#F4F0FB">
+<th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;color:#211638;text-align:left;width:270px">Lead</th>
+<th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;color:#211638;text-align:left;width:150px">Cidade / Idade</th>
+<th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;color:#211638;text-align:left;width:190px">Status da ligação</th>
+<th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;color:#211638;text-align:left;width:180px">Status do Raio X</th>
+<th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;color:#211638;text-align:left;width:100px">Closer</th>
+<th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;color:#211638;text-align:left;width:200px">Próxima ação</th>
+<th scope="col" style="padding:15px 20px;width:130px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Abrir</span></th>
+</tr></thead>
+<tbody>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="1">
+<tr style="border-top:1px solid #0A0A0B">
+<td style="padding:12px 20px"><div style="display:flex;gap:14px;align-items:center">
+<sc-if value="{{ r.hasPhoto }}"><img src="{{ r.photo }}" alt="" style="width:50px;height:50px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 0 1px #E4DDEF"></sc-if>
+<sc-if value="{{ r.noPhoto }}"><div aria-hidden="true" style="width:50px;height:50px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FBF3E4,#EBD7AE);color:#5E4416;font-weight:900;font-size:16px;box-shadow:0 0 0 1px #E4DDEF">{{ r.initials }}</div></sc-if>
+<div style="min-width:0"><div style="font-weight:800;font-size:15.5px;color:#211638">{{ r.name }}</div><div style="color:#6B6380;font-size:13px;white-space:nowrap">{{ r.phone }}</div></div>
+</div></td>
+<td style="padding:12px 20px"><div>{{ r.city }}</div><div style="color:#4A3F66;font-size:13.5px">{{ r.age }}</div></td>
+<td style="padding:12px 20px"><span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;background:{{ r.callB.bg }};color:{{ r.callB.fg }}"><img src="{{ r.callB.icon }}" alt="" width="14" height="14">{{ r.callB.label }}</span><div style="color:#211638;font-size:13.5px;margin-top:5px;white-space:nowrap">{{ r.callWhen }}</div></td>
+<td style="padding:12px 20px"><span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;background:{{ r.rxB.bg }};color:{{ r.rxB.fg }}"><img src="{{ r.rxB.icon }}" alt="" width="14" height="14">{{ r.rxB.label }}</span><div style="color:#211638;font-size:13.5px;margin-top:5px;white-space:nowrap">{{ r.rxWhen }}</div></td>
+<td style="padding:12px 20px">{{ r.closer }}</td>
+<td style="padding:12px 20px"><div style="display:flex;align-items:center;gap:8px;color:{{ r.next.color }};font-weight:700"><img src="{{ r.next.icon }}" alt="" width="18" height="18" style="flex:none"><span>{{ r.next.label }}</span></div></td>
+<td style="padding:12px 20px"><button onClick="{{ r.open }}" aria-label="{{ r.aria }}" style="height:38px;padding:0 12px 0 16px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:14.5px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:8px" style-hover="background:#FBF3E4">Ver lead<img src="{{ I.chev }}" alt="" width="14" height="14"></button></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<sc-if value="{{ noRows }}"><p style="margin:0;padding:28px 20px;color:#6B6380;font-size:14px;text-align:center">{{ noRowsText }}</p></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.detail }}">
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 640px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div><button onClick="{{ back }}" style="height:36px;padding:0 6px;border:0;background:transparent;color:#211638;font-weight:700;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="color:#8C6A2B"><img src="{{ I.backInk }}" alt="" width="18" height="18">Voltar para a lista</button></div>
+<section aria-label="Dados do lead" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:18px 22px;display:flex;flex-wrap:wrap;gap:18px 22px;align-items:center">
+<sc-if value="{{ L.hasPhoto }}"><img src="{{ L.photo }}" alt="{{ L.photoAlt }}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 0 1px #E4DDEF"></sc-if>
+<sc-if value="{{ L.noPhoto }}"><div aria-hidden="true" style="width:84px;height:84px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FBF3E4,#EBD7AE);color:#5E4416;font-weight:900;font-size:26px;box-shadow:0 0 0 1px #E4DDEF">{{ L.initials }}</div></sc-if>
+<div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center"><h1 style="margin:0;font-size:26px;font-weight:900;letter-spacing:-0.01em">{{ L.name }}</h1><span style="display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:8px;font-size:13.5px;font-weight:800;background:{{ L.stageB.bg }};color:{{ L.stageB.fg }}">{{ L.stageB.label }}</span><span title="Ordem de cadastro" style="display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:8px;font-size:13.5px;font-weight:800;background:#F4F0FB;color:#4A3F66">Lead nº {{ L.seq }}</span></div>
+<sc-if value="{{ L.hasCityAge }}"><div style="color:#4A3F66;font-size:15px">{{ L.cityAge }}</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:6px 26px;font-size:15px;color:#211638">
+<span style="display:inline-flex;align-items:center;gap:8px"><img src="{{ I.phone }}" alt="" width="18" height="18">{{ L.phone }}<sc-if value="{{ L.hasWa }}"><a href="{{ L.wa }}" target="_blank" rel="noopener" aria-label="Abrir conversa no WhatsApp" title="Abrir no WhatsApp" style="display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#E8F8EE;margin-left:2px" style-hover="background:#D2F1DE"><svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.3a6.7 6.7 0 0 0-5.8 10l-.9 3.4 3.5-.9A6.7 6.7 0 1 0 8 1.3z" fill="#25D366"></path><path d="M5.6 4.6h1.1l.6 1.5-.7.6a4.2 4.2 0 0 0 2 2l.6-.7 1.5.6v1.1a.7.7 0 0 1-.8.7A5 5 0 0 1 4.9 5.4a.7.7 0 0 1 .7-.8z" fill="#FFFFFF"></path></svg></a></sc-if></span>
+<span style="display:inline-flex;align-items:center;gap:8px"><img src="{{ I.mail }}" alt="" width="18" height="18">{{ L.email }}</span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;flex:0 1 280px">
+<div style="display:flex;gap:8px;justify-content:flex-end">
+<button onClick="{{ viewLead }}" style="height:38px;padding:0 16px;border:1px solid #B8892F;border-radius:10px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="background:#FBF3E4"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#8C6A2B" stroke-width="1.5" aria-hidden="true"><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"></path><circle cx="8" cy="8" r="2"></circle></svg>Ver</button>
+<button onClick="{{ toggleEdit }}" aria-expanded="{{ L.editingStr }}" style="height:38px;padding:0 16px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="filter:brightness(1.06)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#211638" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M10.8 2.2l3 3L5.5 13.5H2.5v-3z"></path></svg>Editar</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px;min-height:40px;padding:0 14px;border:1px solid #E4DDEF;border-radius:10px;font-size:14px"><img src="{{ I.monitorInk }}" alt="" width="18" height="18"><span style="flex:1">Origem: {{ L.origin }}</span></div>
+<div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border:1px solid #E4DDEF;border-radius:10px;font-size:14px"><img src="{{ I.calInk }}" alt="" width="18" height="18">Data de cadastro: {{ L.created }}</div>
+</div>
+</section>
+<sc-if value="{{ L.editing }}">
+<form onSubmit="{{ saveEdit }}" noValidate="" aria-label="Editar dados do lead" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:17px;font-weight:900">Editar dados</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Nome *<input value="{{ f.ed_name }}" onChange="{{ on.ed_name }}" maxLength="120" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span id="lb-ph-ed">Telefone / WhatsApp *</span>
+<div style="position:relative">
+<div role="group" aria-labelledby="lb-ph-ed" style="display:flex;height:42px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;overflow:hidden" style-focus-within="border-color:#B8892F">
+<button type="button" onClick="{{ ddi.ed.toggle }}" aria-haspopup="listbox" aria-expanded="{{ ddi.ed.exp }}" aria-label="Código do país: {{ ddi.ed.name }}" style="flex:none;width:84px;height:100%;display:flex;align-items:center;gap:6px;padding:0 10px 0 12px;border:0;border-right:1px solid #E4DDEF;background:#F8F7FD;color:#211638;font-size:14px;font-weight:700;cursor:pointer"><span>{{ ddi.ed.codeLabel }}</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" style="margin-left:auto"><path d="M2 3.5l3 3 3-3" fill="none" stroke="#4A3F66" stroke-width="1.4"></path></svg></button>
+<input type="tel" aria-label="Número com DDD" value="{{ f.ed_phone }}" onChange="{{ on.ed_phone }}" placeholder="{{ ptype.edPh }}" style="flex:1;min-width:0;height:100%;padding:0 12px;border:0;background:transparent;color:#211638;font-size:14px;outline:none">
+</div>
+<sc-if value="{{ ddi.ed.open }}">
+<div onClick="{{ ddi.stop }}" style="position:absolute;left:0;top:46px;z-index:70;width:min(300px,100%);min-width:260px;background:#FFFFFF;border:1px solid #E4DDEF;border-radius:10px;box-shadow:0 12px 32px rgba(10,10,11,0.16);padding:8px;display:flex;flex-direction:column;gap:6px">
+<input ref="{{ ddi.focusRef }}" aria-label="Buscar país ou código" placeholder="Digite o país ou o código" value="{{ ddi.q }}" onChange="{{ ddi.onQ }}" onKeyDown="{{ ddi.ed.onKey }}" style="height:38px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;font-weight:500;width:100%" style-focus="border-color:#B8892F;outline:none">
+<div role="listbox" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column">
+<sc-for list="{{ ddi.ed.items }}" as="c" hint-placeholder-count="0"><button type="button" role="option" aria-selected="{{ c.sel }}" onClick="{{ c.pick }}" style="flex:none;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;border:0;border-radius:6px;background:{{ c.bg }};color:#211638;font-size:14px;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#F4F0FB"><span style="width:48px;font-weight:700">{{ c.codeLabel }}</span><span>{{ c.name }}</span></button></sc-for>
+<sc-if value="{{ ddi.empty }}"><p style="margin:0;padding:10px;color:#6B6380;font-size:13px;font-weight:500">Nenhum país encontrado para “{{ ddi.q }}”.</p></sc-if>
+</div>
+</div>
+</sc-if>
+</div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">E-mail *<input type="email" value="{{ f.ed_email }}" onChange="{{ on.ed_email }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span style="display:flex;align-items:center;white-space:nowrap">Nacionalidade<span style="position:relative;display:inline-flex;margin-left:6px"><button type="button" onClick="{{ help.natEd.toggle }}" aria-expanded="{{ help.natEd.exp }}" aria-label="Como a nacionalidade é definida" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #B8892F;color:#8C6A2B;font-size:11.5px;font-weight:800;cursor:pointer;background:#FFFFFF;padding:0" style-hover="background:#FBF3E4">?</button><sc-if value="{{ help.natEd.open }}"><span role="tooltip" style="position:absolute;left:0;top:26px;z-index:70;width:240px;padding:10px 12px;border-radius:8px;background:#0A0A0B;color:#F4F1EA;font-size:12.5px;font-weight:500;line-height:1.45;white-space:normal;box-shadow:0 8px 24px rgba(10,10,11,0.25)">Preenchida automaticamente pelo código do país do telefone: +55 = Nacional; outro código = Internacional.</span></sc-if></span></span><div aria-live="polite" style="height:42px;padding:0 12px;border:1px solid #E4DDEF;border-radius:10px;background:#F8F7FD;color:#211638;font-size:14px;font-weight:600;display:flex;align-items:center">{{ ddi.ed.nat }}</div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>Cidade<span style="font-size:11.5px;font-weight:500;color:#6B6380;margin-left:4px">(opcional)</span></span><input value="{{ f.ed_city }}" onChange="{{ on.ed_city }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>Idade<span style="font-size:11.5px;font-weight:500;color:#6B6380;margin-left:4px">(opcional)</span></span><input type="number" min="0" max="120" value="{{ f.ed_age }}" onChange="{{ on.ed_age }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Origem *<select value="{{ f.ed_origin }}" onChange="{{ on.ed_origin }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"><option value="">Selecione</option><option value="Site">Site</option><option value="Instagram">Instagram</option><option value="Facebook">Facebook</option><option value="Google">Google</option><option value="WhatsApp">WhatsApp</option><option value="Indicação">Indicação</option><option value="Outro">Outro</option></select></label>
+<sc-if value="{{ L.edRef.show }}"><div style="grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 14px;border:1px solid #E6C88A;border-radius:10px;background:#FBF3E4">
+<sc-if value="{{ L.edRef.hasPhoto }}"><img src="{{ L.edRef.photo }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none"></sc-if>
+<div style="flex:1 1 200px;min-width:0"><div style="font-size:14px;font-weight:800;color:#211638">{{ L.edRef.title }}</div><div style="font-size:12.5px;color:#4A3F66">{{ L.edRef.contact }}</div></div>
+<button type="button" onClick="{{ openRefEd }}" style="height:34px;padding:0 12px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:13px;cursor:pointer">{{ L.edRef.btn }}</button>
+</div></sc-if>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>Foto (opcional)<span style="position:relative;display:inline-flex;vertical-align:middle"><button type="button" onClick="{{ help.ed.toggle }}" aria-expanded="{{ help.ed.exp }}" aria-label="Formatos de foto aceitos" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #B8892F;color:#8C6A2B;font-size:11.5px;font-weight:800;cursor:pointer;background:#FFFFFF;padding:0;margin-left:6px;vertical-align:middle" style-hover="background:#FBF3E4">?</button><sc-if value="{{ help.ed.open }}"><span role="tooltip" style="position:absolute;left:0;top:26px;z-index:70;width:220px;padding:10px 12px;border-radius:8px;background:#0A0A0B;color:#F4F1EA;font-size:12.5px;font-weight:500;line-height:1.45;box-shadow:0 8px 24px rgba(10,10,11,0.25)">Formatos aceitos: JPG, PNG ou WEBP.<br>Tamanho máximo: 5 MB.</span></sc-if></span></span>
+<div style="display:flex;align-items:center;gap:14px">
+<label aria-label="Escolher foto" style="position:relative;width:92px;height:92px;border-radius:50%;border:2px dashed #B8892F;background:#FBF3E4;display:grid;place-items:center;cursor:pointer;overflow:hidden;flex:none" style-hover="background:#F6E7C9">
+<sc-if value="{{ L.hasEdPhoto }}"><img src="{{ f.ed_photo }}" alt="Foto escolhida" style="width:100%;height:100%;object-fit:cover"></sc-if>
+<sc-if value="{{ L.noEdPhoto }}"><span style="display:flex;flex-direction:column;align-items:center;gap:2px;color:#8C6A2B;font-size:12px;font-weight:800;text-align:center;line-height:1.2"><span style="font-size:22px;line-height:1">+</span>Adicionar<br>foto</span></sc-if>
+<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ photoEd }}" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+</label>
+<div style="display:flex;flex-direction:column;gap:8px;font-weight:600;color:#6B6380;font-size:12.5px"><sc-if value="{{ L.hasEdPhoto }}"><button type="button" onClick="{{ rmPhotoEd }}" style="align-self:flex-start;height:32px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:13px;cursor:pointer">Remover foto</button></sc-if></div>
+</div>
+</div>
+</div>
+<sc-if value="{{ errs.hasEd }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.ed }}</p></sc-if>
+<sc-if value="{{ dup.ed }}"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 14px;border:1px solid #F3C2C2;border-radius:10px;background:#FFF6F6">
+<sc-if value="{{ dup.hasPhoto }}"><img src="{{ dup.photo }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none"></sc-if>
+<sc-if value="{{ dup.noPhoto }}"><div aria-hidden="true" style="width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FBF3E4,#EBD7AE);color:#5E4416;font-weight:900;font-size:13px">{{ dup.initials }}</div></sc-if>
+<div style="flex:1 1 200px;min-width:0"><div style="font-size:14px;font-weight:800;color:#211638">{{ dup.name }}</div><div style="font-size:12.5px;color:#4A3F66">{{ dup.contact }}</div></div>
+<button type="button" onClick="{{ dup.view }}" style="height:36px;padding:0 16px;border:0;border-radius:8px;background:#1B7A42;color:#FFFFFF;font-weight:800;font-size:14px;cursor:pointer" style-hover="background:#16663A">Ver</button>
+</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button type="submit" style="height:42px;padding:0 18px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Salvar dados</button><button type="button" onClick="{{ toggleEdit }}" style="height:42px;padding:0 16px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14px;cursor:pointer">Cancelar</button></div>
+</form>
+</sc-if>
+
+<div role="tablist" aria-label="Etapas do lead" style="display:flex;gap:6px;padding:5px;border:1px solid #E4DDEF;border-radius:12px;background:#FFFFFF;align-self:flex-start">
+<sc-for list="{{ TB.items }}" as="tb" hint-placeholder-count="2"><button role="tab" aria-selected="{{ tb.sel }}" onClick="{{ tb.onClick }}" style="height:42px;padding:0 22px;border:1px solid {{ tb.bd }};border-radius:9px;background:{{ tb.bg }};color:#211638;font-weight:{{ tb.fw }};font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;white-space:nowrap" style-hover="filter:brightness(1.03)"><img src="{{ tb.icon }}" alt="" width="18" height="18">{{ tb.label }}<span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:800;background:{{ tb.sb }};color:{{ tb.sf }}">{{ tb.status }}</span></button></sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+<sc-if value="{{ TB.lig }}"><div style="flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:16px">
+<section aria-labelledby="h-lig" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px"><img src="{{ I.phone }}" alt="" width="22" height="22"><h2 id="h-lig" style="margin:0;font-size:19px;font-weight:800">1. Ligação</h2><span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;background:{{ C.b.bg }};color:{{ C.b.fg }}">{{ C.b.label }}</span></div>
+<sc-if value="{{ C.hasNote }}"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#F8F7FD;border:1px solid #EEE8F6;font-size:13.5px;color:#4A3F66"><span style="flex:1 1 220px">{{ C.note }}</span></div></sc-if>
+<sc-if value="{{ C.showInputs }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Data da ligação<input type="date" value="{{ f.callDate }}" onChange="{{ on.callDate }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Horário<input type="time" value="{{ f.callTime }}" onChange="{{ on.callTime }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"></label>
+</div>
+</sc-if>
+
+<sc-if value="{{ C.overdue }}"><p role="alert" style="margin:0;padding:10px 12px;border-radius:8px;background:#FDE7E7;color:#9B1F1F;font-size:13.5px;font-weight:800">Ligação atrasada: o horário passou sem resultado registrado.</p></sc-if>
+<sc-if value="{{ C.isScheduled }}">
+<sc-if value="{{ C.editing }}"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid #E6C88A;background:#FFFFFF;font-size:14px;font-weight:700;color:#211638"><span style="flex:1 1 200px">Escolha o novo resultado da ligação.</span><button onClick="{{ callEditOff }}" style="height:34px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:13.5px;cursor:pointer">Cancelar</button></div></sc-if>
+<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#FBF3E4;color:#5E4416;font-size:14px"><img src="{{ I.info }}" alt="" width="18" height="18" style="flex:none">Se o lead não atender, use “Reagendar ligação”.</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button onClick="{{ callAnswered }}" style="height:42px;padding:0 16px;border:1px solid #8FD1A8;border-radius:8px;background:#ECF8F0;color:#1B7A42;font-weight:800;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="background:#DDF2E5"><img src="{{ I.checkGreen }}" alt="" width="16" height="16">Atendeu</button>
+<button onClick="{{ modeNA }}" aria-pressed="{{ C.modeNAStr }}" style="height:42px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="background:#F8F7FD"><img src="{{ I.phoneXRed }}" alt="" width="16" height="16">Não atendeu</button>
+<button onClick="{{ modeRS }}" aria-pressed="{{ C.modeRSStr }}" style="height:42px;padding:0 14px;border:1px solid #B8892F;border-radius:8px;background:#FBF3E4;color:#8C6A2B;font-weight:800;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="background:#F6E7C9"><img src="{{ I.cal }}" alt="" width="16" height="16">Reagendar ligação</button>
+</div>
+<sc-if value="{{ C.modeNA }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:10px;background:#F8F7FD;border:1px solid #EEE8F6">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Motivo *<select value="{{ f.naReason }}" onChange="{{ on.naReason }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"><option value="">Selecione o motivo</option><option value="Não atende">Não atende</option><option value="Caixa postal">Caixa postal</option><option value="Número inválido">Número inválido</option><option value="Pediu para ligar depois">Pediu para ligar depois</option><option value="Outro">Outro</option></select></label>
+<sc-if value="{{ C.naOther }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Descreva o motivo *<input value="{{ f.naOther }}" onChange="{{ on.naOther }}" maxLength="200" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button onClick="{{ callNotAnswered }}" style="height:40px;padding:0 16px;border:0;border-radius:8px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Registrar tentativa</button><button onClick="{{ modeOff }}" style="height:40px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14px;cursor:pointer">Cancelar</button></div>
+</div>
+</sc-if>
+<sc-if value="{{ C.modeRS }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:10px;background:#F8F7FD;border:1px solid #EEE8F6">
+<p style="margin:0;font-size:13px;color:#4A3F66">Altere a data e o horário acima e informe o motivo. O horário anterior fica no histórico.</p>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Motivo do reagendamento *<input value="{{ f.rsReason }}" onChange="{{ on.rsReason }}" maxLength="200" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button onClick="{{ callReschedule }}" style="height:40px;padding:0 16px;border:0;border-radius:8px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Confirmar reagendamento</button><button onClick="{{ modeOff }}" style="height:40px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14px;cursor:pointer">Cancelar</button></div>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ C.canSchedule }}"><div><button onClick="{{ scheduleCall }}" style="height:44px;padding:0 20px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="filter:brightness(1.06)"><img src="{{ I.calInk }}" alt="" width="18" height="18">{{ C.scheduleLabel }}</button></div></sc-if>
+<sc-if value="{{ errs.hasCall }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.call }}</p></sc-if>
+<sc-if value="{{ C.hasAttempts }}">
+<div style="display:flex;flex-direction:column">
+<div style="font-size:13px;font-weight:800;color:#4A3F66;margin-bottom:4px">Tentativas ({{ C.attemptsCount }})</div>
+<sc-for list="{{ C.attempts }}" as="a" hint-placeholder-count="2"><div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:8px 0;border-top:1px solid #F0EBF7;font-size:13px"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:800;background:{{ a.b.bg }};color:{{ a.b.fg }}">{{ a.b.label }}</span><span>{{ a.when }}</span><span style="color:#6B6380">{{ a.reason }}</span></div></sc-for>
+</div>
+</sc-if>
+</section>
+
+<section aria-labelledby="h-res" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:10px"><img src="{{ I.pencil }}" alt="" width="22" height="22"><h2 id="h-res" style="margin:0;font-size:19px;font-weight:800">2. Resumo do lead</h2></div>
+<textarea aria-labelledby="h-res" placeholder="Pré-diagnóstico, problema principal e tudo que o closer precisa saber." value="{{ f.summary }}" onChange="{{ on.summary }}" maxLength="8000" rows="6" style="min-height:140px;padding:12px 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;line-height:1.5;resize:vertical;width:100%"></textarea>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+<span style="color:{{ S.color }};font-size:12.5px;font-weight:700">{{ S.status }}</span>
+<button onClick="{{ saveSummary }}" style="height:40px;padding:0 16px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:14px;cursor:pointer" style-hover="background:#FBF3E4">Salvar resumo</button>
+</div>
+</section>
+</div>
+
+</sc-if>
+<sc-if value="{{ TB.rx }}"><div style="flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:16px">
+<section aria-labelledby="h-rx" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px"><img src="{{ I.cal }}" alt="" width="22" height="22"><h2 id="h-rx" style="margin:0;font-size:19px;font-weight:800">3. Raio X (Reunião com o Closer)</h2></div>
+<sc-if value="{{ X.hasSummary }}"><div style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:10px 12px;border-radius:8px;background:#F8F7FD;border:1px solid #EEE8F6;font-size:13.5px;color:#4A3F66"><span style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;font-size:12.5px;font-weight:800;background:{{ X.b.bg }};color:{{ X.b.fg }}">{{ X.b.label }}</span><span>{{ X.summary }}</span></div></sc-if>
+<sc-if value="{{ X.showForm }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Data<input type="date" value="{{ f.mxDate }}" onChange="{{ on.mxDate }}" disabled="{{ X.lock }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Horário<input type="time" value="{{ f.mxTime }}" onChange="{{ on.mxTime }}" disabled="{{ X.lock }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Closer<select value="{{ f.mxCloser }}" onChange="{{ on.mxCloser }}" disabled="{{ X.lock }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"><option value="">Selecione</option><sc-for list="{{ closerOpts }}" as="c" hint-placeholder-count="0"><option value="{{ c.id }}">{{ c.name }}</option></sc-for></select></label>
+<sc-if value="{{ X.active }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Status da reunião<select value="{{ f.mxStatus }}" onChange="{{ on.mxStatus }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"><option value="agendada">Agendada</option><option value="confirmada">Confirmada</option><option value="realizada">Realizada</option><option value="nao_compareceu">Não compareceu</option><option value="cancelada">Cancelada</option><option value="reagendada">Reagendada</option></select></label></sc-if>
+<sc-if value="{{ X.notActive }}"><div style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638"><span>Status da reunião</span><div style="height:42px;padding:0 12px;border:1px solid #E4DDEF;border-radius:8px;background:#F8F7FD;display:flex;align-items:center;font-weight:600;color:#4A3F66">Não marcada</div></div></sc-if>
+<sc-if value="{{ X.hasDur }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Duração<select value="{{ f.mxDur }}" onChange="{{ on.mxDur }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"><option value="30">30 min</option><option value="45">45 min</option><option value="60">60 min</option><option value="90">90 min</option></select></label></sc-if>
+</div>
+<sc-if value="{{ X.isResched }}"><p style="margin:0;font-size:13px;color:#4A3F66">Altere data, horário ou closer acima. O horário anterior fica no histórico.</p></sc-if>
+<sc-if value="{{ X.isDone }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Data e hora efetivas *<input type="datetime-local" value="{{ f.mxDone }}" onChange="{{ on.mxDone }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:15px;width:100%"></label></sc-if>
+<sc-if value="{{ X.needReason }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:700;color:#211638">Motivo *<input value="{{ f.mxReason }}" onChange="{{ on.mxReason }}" maxLength="200" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label></sc-if>
+<sc-if value="{{ X.overdue }}"><p role="alert" style="margin:0;padding:10px 12px;border-radius:8px;background:#FDE7E7;color:#9B1F1F;font-size:13.5px;font-weight:800">O horário passou. Registre o desfecho do Raio X.</p></sc-if>
+<div><button onClick="{{ X.action }}" style="height:44px;padding:0 22px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="filter:brightness(1.06)"><img src="{{ I.calInk }}" alt="" width="18" height="18">{{ X.actionLabel }}</button></div>
+</sc-if>
+<sc-if value="{{ X.noClosers }}"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px;border-radius:8px;background:#FBF3E4;color:#5E4416;font-size:13.5px;font-weight:700"><span>Nenhum closer ativo cadastrado.</span><button onClick="{{ goCfg }}" style="height:34px;padding:0 12px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;cursor:pointer">Cadastrar closers</button></div></sc-if>
+<sc-if value="{{ errs.hasMx }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.mx }}</p></sc-if>
+<sc-if value="{{ X.hasHistory }}">
+<div style="display:flex;flex-direction:column">
+<div style="font-size:13px;font-weight:800;color:#4A3F66;margin-bottom:4px">Reuniões deste lead ({{ X.count }})</div>
+<sc-for list="{{ X.history }}" as="m" hint-placeholder-count="2"><div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:8px 0;border-top:1px solid #F0EBF7;font-size:13px"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:800;background:{{ m.b.bg }};color:{{ m.b.fg }}">{{ m.b.label }}</span><span>{{ m.when }}</span><span style="color:#4A3F66">{{ m.closer }}</span><span style="color:#6B6380">{{ m.reason }}</span></div></sc-for>
+</div>
+</sc-if>
+</section>
+
+<section aria-labelledby="h-rs" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:10px"><img src="{{ I.target }}" alt="" width="22" height="22"><h2 id="h-rs" style="margin:0;font-size:19px;font-weight:800">4. Resultado</h2></div>
+<sc-if value="{{ R.isSold }}">
+<div style="display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:10px;background:#ECF8F0;border:1px solid #C8EBD4">
+<strong style="color:#14643A;font-size:15px">{{ R.soldTitle }}</strong><span style="color:#1F4D33;font-size:13.5px">{{ R.soldText }}</span><span style="color:#4A6B57;font-size:12.5px">Forma de pagamento registrada no fechamento. Não indica pagamento compensado.</span>
+</div>
+</sc-if>
+<sc-if value="{{ R.editable }}">
+<div role="radiogroup" aria-labelledby="h-rs" style="display:flex;flex-direction:column;gap:2px">
+<sc-for list="{{ R.opts }}" as="o" hint-placeholder-count="4">
+<button role="radio" aria-checked="{{ o.pressed }}" onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:12px;height:36px;padding:0 4px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:16px;font-weight:{{ o.fw }};color:#211638;text-align:left" style-hover="background:#F8F7FD"><span style="width:20px;height:20px;border-radius:50%;border:2px solid {{ o.ring }};display:grid;place-items:center;flex:none"><span style="width:10px;height:10px;border-radius:50%;background:{{ o.dot }}"></span></span>{{ o.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ R.hasCurText }}"><p style="margin:0;color:#6B6380;font-size:13px">{{ R.curText }}</p></sc-if>
+<sc-if value="{{ R.showSale }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Valor (R$) *<input inputMode="decimal" value="{{ f.saleAmount }}" onChange="{{ on.saleAmount }}" placeholder="4.970,00" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Forma de pagamento *<select value="{{ f.saleMethod }}" onChange="{{ on.saleMethod }}" style="height:42px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"><option value="">Selecione</option><option value="Pix">Pix</option><option value="Cartão à vista">Cartão à vista</option><option value="Cartão parcelado">Cartão parcelado</option><option value="Boleto">Boleto</option><option value="Transferência">Transferência</option></select></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Data do fechamento *<input type="date" value="{{ f.saleDate }}" onChange="{{ on.saleDate }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+</div>
+</sc-if>
+<sc-if value="{{ R.showRmk }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Motivo de não compra *<input value="{{ f.rmkReason }}" onChange="{{ on.rmkReason }}" maxLength="300" placeholder="Descreva por que não comprou" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Data de novo contato *<input type="date" value="{{ f.rmkDate }}" onChange="{{ on.rmkDate }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+</div>
+</sc-if>
+<sc-if value="{{ R.showDq }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Motivo da desqualificação *<input value="{{ f.dqReason }}" onChange="{{ on.dqReason }}" maxLength="200" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label></sc-if>
+<sc-if value="{{ R.changed }}"><div><button onClick="{{ saveResult }}" style="height:42px;padding:0 18px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Salvar resultado</button></div></sc-if>
+</sc-if>
+<sc-if value="{{ errs.hasRes }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.res }}</p></sc-if>
+</section>
+</div></sc-if>
+</div>
+
+<section aria-labelledby="h-hist" style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 id="h-hist" style="margin:0;font-size:17px;font-weight:800">Histórico</h2><button onClick="{{ HT.toggle }}" aria-expanded="{{ HT.exp }}" aria-controls="hist-list" style="height:38px;padding:0 16px;border:0;border-radius:10px;background:#1B7A42;color:#FFFFFF;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px" style-hover="background:#16663A">{{ HT.label }}<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style="transform:{{ HT.rot }}"><path d="M2.5 4.5l3.5 3.5 3.5-3.5" fill="none" stroke="#FFFFFF" stroke-width="1.6"></path></svg></button></div>
+<sc-if value="{{ HT.open }}"><div id="hist-list" style="margin-top:12px">
+<sc-for list="{{ H }}" as="h" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:minmax(120px,160px) minmax(0,1fr);gap:14px;padding:11px 0;border-top:1px solid #F0EBF7;font-size:14px">
+<div style="color:#6B6380;font-size:13px">{{ h.when }}</div>
+<div><div style="font-weight:800">{{ h.text }}</div><sc-if value="{{ h.hasDetail }}"><div style="color:#4A3F66;font-size:13px;margin-top:2px">{{ h.detail }}</div></sc-if><div style="color:#8A829C;font-size:12px;margin-top:2px">por {{ h.author }}</div></div>
+</div>
+</sc-for>
+</div></sc-if>
+</section>
+</div>
+
+<aside aria-label="Resumo da agenda" style="flex:1 1 290px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:18px">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><img src="{{ I.cal }}" alt="" width="22" height="22"><h2 style="margin:0;font-size:19px;font-weight:800;color:#8C6A2B;flex:1">Calendário</h2><button onClick="{{ goCal }}" aria-label="Abrir calendário" style="width:30px;height:30px;border:0;border-radius:6px;background:transparent;cursor:pointer;display:grid;place-items:center" style-hover="background:#F4F0FB"><img src="{{ I.chev }}" alt="" width="16" height="16"></button></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<button onClick="{{ mini.prev }}" aria-label="Mês anterior" style="width:28px;height:28px;border:0;border-radius:6px;background:transparent;cursor:pointer;display:grid;place-items:center" style-hover="background:#F4F0FB"><img src="{{ I.chevLInk }}" alt="" width="14" height="14"></button>
+<strong style="font-size:14.5px">{{ mini.label }}</strong>
+<button onClick="{{ mini.next }}" aria-label="Próximo mês" style="width:28px;height:28px;border:0;border-radius:6px;background:transparent;cursor:pointer;display:grid;place-items:center" style-hover="background:#F4F0FB"><img src="{{ I.chevInk }}" alt="" width="14" height="14"></button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center">
+<sc-for list="{{ mini.heads }}" as="h" hint-placeholder-count="7"><span style="font-size:12px;font-weight:700;color:#4A3F66;padding:4px 0">{{ h }}</span></sc-for>
+<sc-for list="{{ mini.cells }}" as="c" hint-placeholder-count="30"><button onClick="{{ c.open }}" aria-label="{{ c.aria }}" style="justify-self:center;width:30px;height:30px;border-radius:50%;border:0;background:{{ c.bg }};color:{{ c.fg }};font-size:12.5px;font-weight:{{ c.fw }};cursor:pointer;visibility:{{ c.vis }}">{{ c.num }}</button></sc-for>
+</div>
+</section>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:18px">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><img src="{{ I.phone }}" alt="" width="22" height="22"><h2 style="margin:0;font-size:19px;font-weight:800;color:#8C6A2B;flex:1">Reagendar ligação</h2><sc-if value="{{ counts.hasNa }}"><span style="min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:#E5484D;color:#FFFFFF;font-size:12.5px;font-weight:900;display:grid;place-items:center">{{ counts.na }}</span></sc-if></div>
+<sc-for list="{{ naSide }}" as="r" hint-placeholder-count="1">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #F0EBF7">
+<sc-if value="{{ r.hasPhoto }}"><img src="{{ r.photo }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none"></sc-if>
+<sc-if value="{{ r.noPhoto }}"><div aria-hidden="true" style="width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FBF3E4,#EBD7AE);color:#5E4416;font-weight:900;font-size:13px">{{ r.initials }}</div></sc-if>
+<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14.5px">{{ r.name }}</div><div style="color:#4A3F66;font-size:13px">{{ r.cityAge }}</div></div>
+<button onClick="{{ r.open }}" aria-label="{{ r.aria }}" style="width:42px;height:36px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;cursor:pointer;display:grid;place-items:center" style-hover="background:#FBF3E4"><img src="{{ I.phone }}" alt="" width="18" height="18"></button>
+</div>
+</sc-for>
+<sc-if value="{{ naEmpty }}"><p style="margin:0;color:#6B6380;font-size:13.5px">Nenhuma ligação pendente.</p></sc-if>
+</section>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:18px">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><img src="{{ I.list }}" alt="" width="22" height="22"><h2 style="margin:0;font-size:19px;font-weight:800;color:#8C6A2B;flex:1">Próximas ações</h2><button onClick="{{ goLeads }}" aria-label="Ver todos os leads" style="width:30px;height:30px;border:0;border-radius:6px;background:transparent;cursor:pointer;display:grid;place-items:center" style-hover="background:#F4F0FB"><img src="{{ I.chev }}" alt="" width="16" height="16"></button></div>
+<sc-for list="{{ nextSide }}" as="a" hint-placeholder-count="3">
+<button onClick="{{ a.open }}" style="display:flex;gap:12px;align-items:flex-start;width:100%;padding:11px 0;border:0;border-top:1px solid #F0EBF7;background:transparent;text-align:left;cursor:pointer"><img src="{{ a.icon }}" alt="" width="20" height="20" style="flex:none;margin-top:1px"><span><span style="display:block;font-weight:800;font-size:14.5px;color:#211638">{{ a.title }}</span><span style="display:block;color:{{ a.subColor }};font-size:13px;margin-top:2px">{{ a.sub }}</span></span></button>
+</sc-for>
+<sc-if value="{{ nextEmpty }}"><p style="margin:0;color:#6B6380;font-size:13.5px">Nenhuma ação pendente.</p></sc-if>
+</section>
+</aside>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.na }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Não atendidas</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Última tentativa sem resposta. Ao agendar nova ligação, o lead sai desta lista e a tentativa fica no histórico.</p></div>
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;overflow:hidden"><div style="overflow-x:auto">
+<table style="width:100%;min-width:860px;border-collapse:collapse;font-size:14.5px">
+<thead><tr style="background:#F4F0FB"><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Lead</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Tentativas sem resposta</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Última tentativa</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Motivo</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Ação</th></tr></thead>
+<tbody>
+<sc-for list="{{ naRows }}" as="r" hint-placeholder-count="1">
+<tr style="border-top:1px solid #0A0A0B">
+<td style="padding:14px 20px"><div style="font-weight:800">{{ r.name }}</div><div style="color:#6B6380;font-size:13px">{{ r.phone }}</div></td>
+<td style="padding:14px 20px">{{ r.attempts }}</td>
+<td style="padding:14px 20px;white-space:nowrap">{{ r.last }}</td>
+<td style="padding:14px 20px"><span style="display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;background:#FDE7E7;color:#B32727">{{ r.reason }}</span></td>
+<td style="padding:14px 20px"><button onClick="{{ r.open }}" style="height:38px;padding:0 16px;border:0;border-radius:8px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap">Abrir e reagendar</button></td>
+</tr>
+</sc-for>
+</tbody></table></div>
+<sc-if value="{{ naEmpty }}"><p style="margin:0;padding:28px 20px;color:#6B6380;text-align:center">Nenhuma ligação pendente de reagendamento.</p></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.cal }}">
+<div style="display:flex;flex-direction:column;gap:18px">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Calendário</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Agenda interna · horários em America/Sao_Paulo · sem sincronização com calendário externo</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<div role="group" aria-label="Visão" style="display:flex;padding:4px;gap:4px;border-radius:10px;background:#FFFFFF;border:1px solid #E4DDEF">
+<sc-for list="{{ cal.modes }}" as="m" hint-placeholder-count="3"><button onClick="{{ m.onClick }}" aria-pressed="{{ m.pressed }}" style="height:36px;padding:0 14px;border:0;border-radius:7px;background:{{ m.bg }};color:#211638;font-weight:800;font-size:13.5px;cursor:pointer">{{ m.label }}</button></sc-for>
+</div>
+<div style="display:flex;gap:6px;align-items:center">
+<button onClick="{{ cal.prev }}" aria-label="Período anterior" style="width:40px;height:40px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;cursor:pointer;display:grid;place-items:center"><img src="{{ I.chevLInk }}" alt="" width="16" height="16"></button>
+<button onClick="{{ cal.today }}" style="height:40px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;font-weight:800;font-size:13.5px;cursor:pointer">Hoje</button>
+<button onClick="{{ cal.next }}" aria-label="Próximo período" style="width:40px;height:40px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;cursor:pointer;display:grid;place-items:center"><img src="{{ I.chevInk }}" alt="" width="16" height="16"></button>
+</div>
+<strong aria-live="polite" style="font-size:16px;flex:1 1 200px">{{ cal.label }}</strong>
+<label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700">Closer<select value="{{ cal.closer }}" onChange="{{ cal.onCloser }}" style="height:40px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px"><option value="all">Todos</option><sc-for list="{{ allCloserOpts }}" as="c" hint-placeholder-count="0"><option value="{{ c.id }}">{{ c.name }}</option></sc-for></select></label>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:#4A3F66">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#B8892F"></span>Ligação</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#5D3594"></span>Raio X</span>
+<sc-if value="{{ cal.filtered }}"><span style="color:#6B6380">Com closer selecionado, ligações ficam ocultas (não têm closer).</span></sc-if>
+</div>
+<sc-if value="{{ cal.isDay }}">
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:8px 20px">
+<sc-for list="{{ cal.dayEvents }}" as="e" hint-placeholder-count="1"><button onClick="{{ e.open }}" style="display:grid;grid-template-columns:70px 12px minmax(0,1fr);gap:12px;align-items:center;width:100%;padding:14px 0;border:0;border-bottom:1px solid #F0EBF7;background:transparent;text-align:left;cursor:pointer"><strong style="font-size:15px">{{ e.time }}</strong><span style="width:10px;height:10px;border-radius:50%;background:{{ e.dot }}"></span><span><span style="font-weight:800;font-size:14.5px">{{ e.kind }} · {{ e.name }}</span><br><span style="color:#6B6380;font-size:13px">{{ e.sub }}</span></span></button></sc-for>
+<sc-if value="{{ cal.dayEmpty }}"><p style="margin:0;padding:24px 0;color:#6B6380;text-align:center">Sem eventos neste dia.</p></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ cal.isWeek }}">
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;overflow:hidden"><div style="overflow-x:auto">
+<div style="display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));min-width:920px">
+<sc-for list="{{ cal.week }}" as="dy" hint-placeholder-count="7">
+<div style="border-right:1px solid #F0EBF7;min-height:320px;display:flex;flex-direction:column">
+<button onClick="{{ dy.openDay }}" style="padding:12px;border:0;border-bottom:1px solid #EEE8F6;background:{{ dy.hbg }};color:#211638;font-weight:800;font-size:13px;text-align:left;cursor:pointer">{{ dy.label }}</button>
+<div style="display:flex;flex-direction:column;gap:6px;padding:8px">
+<sc-for list="{{ dy.events }}" as="e" hint-placeholder-count="0"><button onClick="{{ e.open }}" aria-label="{{ e.aria }}" style="display:flex;flex-direction:column;gap:2px;padding:8px;border:0;border-radius:8px;background:{{ e.bg }};text-align:left;cursor:pointer;width:100%"><span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:#4A3F66"><span style="width:8px;height:8px;border-radius:50%;background:{{ e.dot }};flex:none"></span>{{ e.time }} · {{ e.kind }}</span><span style="font-size:13px;font-weight:800;color:#211638">{{ e.name }}</span><span style="font-size:11.5px;color:#6B6380">{{ e.sub }}</span></button></sc-for>
+</div>
+</div>
+</sc-for>
+</div></div></div>
+</sc-if>
+<sc-if value="{{ cal.isMonth }}">
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;overflow:hidden"><div style="overflow-x:auto"><div style="min-width:760px">
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:#F4F0FB"><sc-for list="{{ cal.wdNames }}" as="n" hint-placeholder-count="7"><div style="padding:10px 12px;font-size:13px;font-weight:800">{{ n }}</div></sc-for></div>
+<sc-for list="{{ cal.weeks }}" as="w" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid #EEE8F6">
+<sc-for list="{{ w.days }}" as="dy" hint-placeholder-count="7">
+<div style="min-height:108px;padding:6px;border-right:1px solid #F0EBF7;background:{{ dy.bg }};display:flex;flex-direction:column;gap:4px">
+<button onClick="{{ dy.openDay }}" aria-label="{{ dy.aria }}" style="align-self:flex-start;border:0;background:transparent;padding:2px 4px;font-size:13px;font-weight:800;color:{{ dy.numColor }};cursor:pointer">{{ dy.num }}</button>
+<sc-for list="{{ dy.events }}" as="e" hint-placeholder-count="0"><button onClick="{{ e.open }}" aria-label="{{ e.aria }}" style="display:flex;align-items:center;gap:5px;padding:3px 6px;border:0;border-radius:6px;background:{{ e.bg }};font-size:11.5px;font-weight:700;color:#211638;text-align:left;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"><span style="width:7px;height:7px;border-radius:50%;background:{{ e.dot }};flex:none"></span>{{ e.time }} {{ e.short }}</button></sc-for>
+<sc-if value="{{ dy.hasMore }}"><button onClick="{{ dy.openDay }}" style="align-self:flex-start;border:0;background:transparent;padding:0 4px;font-size:11.5px;font-weight:800;color:#8C6A2B;cursor:pointer">{{ dy.more }}</button></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div></div></div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.rmk }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Remarketing</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Leads que não compraram, com motivo e data de novo contato. Desqualificados não aparecem aqui.</p></div>
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;overflow:hidden"><div style="overflow-x:auto">
+<table style="width:100%;min-width:900px;border-collapse:collapse;font-size:14.5px">
+<thead><tr style="background:#F4F0FB"><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Lead</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Motivo de não compra</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Retorno</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Status</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Ações</th></tr></thead>
+<tbody>
+<sc-for list="{{ rmkRows }}" as="r" hint-placeholder-count="1">
+<tr style="border-top:1px solid #0A0A0B">
+<td style="padding:14px 20px"><div style="font-weight:800">{{ r.name }}</div><div style="color:#6B6380;font-size:13px">{{ r.phone }}</div></td>
+<td style="padding:14px 20px">{{ r.reason }}</td>
+<td style="padding:14px 20px;white-space:nowrap"><div style="font-weight:800;color:{{ r.retColor }}">{{ r.ret }}</div><div style="color:#6B6380;font-size:12.5px">{{ r.retNote }}</div></td>
+<td style="padding:14px 20px"><span style="display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;background:{{ r.b.bg }};color:{{ r.b.fg }}">{{ r.b.label }}</span></td>
+<td style="padding:14px 20px"><div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-if value="{{ r.canContact }}"><button onClick="{{ r.contact }}" style="height:38px;padding:0 14px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap">Registrar contato</button></sc-if>
+<button onClick="{{ r.open }}" style="height:38px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:800;font-size:13.5px;cursor:pointer">Ver lead</button>
+</div></td>
+</tr>
+</sc-for>
+</tbody></table></div>
+<sc-if value="{{ rmkEmpty }}"><p style="margin:0;padding:28px 20px;color:#6B6380;text-align:center">Nenhum lead em remarketing.</p></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.sales }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Vendas</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Vendas com data de fechamento e forma de pagamento escolhida (não confirma compensação).</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:14px;padding:16px 20px;min-width:180px"><div style="color:#6B6380;font-size:13px;font-weight:700">Vendas</div><div style="font-size:26px;font-weight:900">{{ sales.count }}</div></div>
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:14px;padding:16px 20px;min-width:180px"><div style="color:#6B6380;font-size:13px;font-weight:700">Faturamento registrado</div><div style="font-size:26px;font-weight:900">{{ sales.total }}</div></div>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;overflow:hidden"><div style="overflow-x:auto">
+<table style="width:100%;min-width:860px;border-collapse:collapse;font-size:14.5px">
+<thead><tr style="background:#F4F0FB"><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Lead</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Fechamento</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Valor</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Forma de pagamento</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Closer</th><th scope="col" style="padding:15px 20px;font-size:13px;font-weight:800;text-align:left">Ver lead</th></tr></thead>
+<tbody>
+<sc-for list="{{ sales.rows }}" as="r" hint-placeholder-count="1">
+<tr style="border-top:1px solid #0A0A0B">
+<td style="padding:14px 20px;font-weight:800">{{ r.name }}</td><td style="padding:14px 20px;white-space:nowrap">{{ r.date }}</td><td style="padding:14px 20px;font-weight:800;white-space:nowrap">{{ r.amount }}</td>
+<td style="padding:14px 20px"><span style="display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;background:#DFF5E7;color:#1B7A42">{{ r.method }}</span></td>
+<td style="padding:14px 20px">{{ r.closer }}</td>
+<td style="padding:14px 20px"><button onClick="{{ r.open }}" style="height:38px;padding:0 16px;border:1px solid #B8892F;border-radius:8px;background:#FFFFFF;color:#8C6A2B;font-weight:800;font-size:14px;cursor:pointer">Ver lead</button></td>
+</tr>
+</sc-for>
+</tbody></table></div>
+<sc-if value="{{ sales.empty }}"><p style="margin:0;padding:28px 20px;color:#6B6380;text-align:center">Nenhuma venda registrada.</p></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.ov }}">
+<div style="display:flex;flex-direction:column;gap:18px">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Visão Geral</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Leitura do período, calculada pelo histórico de eventos. Datas em America/Sao_Paulo.</p></div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<div role="group" aria-label="Período" style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ OV.periods }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.onClick }}" aria-pressed="{{ p.pressed }}" style="height:40px;padding:0 14px;border-radius:8px;border:1px solid {{ p.bd }};background:{{ p.bg }};color:#211638;font-weight:800;font-size:13.5px;cursor:pointer">{{ p.label }}</button></sc-for>
+</div>
+<sc-if value="{{ OV.isCustom }}">
+<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700">De<input type="date" value="{{ OV.from }}" onChange="{{ OV.onFrom }}" style="height:40px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px"></label>
+<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700">Até<input type="date" value="{{ OV.to }}" onChange="{{ OV.onTo }}" style="height:40px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px"></label>
+</sc-if>
+<label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin-left:auto">Closer<select value="{{ OV.closer }}" onChange="{{ OV.onCloser }}" style="height:40px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px"><option value="all">Todos</option><sc-for list="{{ allCloserOpts }}" as="c" hint-placeholder-count="0"><option value="{{ c.id }}">{{ c.name }}</option></sc-for></select></label>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13.5px;color:#4A3F66"><strong>Período: {{ OV.label }}</strong><sc-if value="{{ OV.hasErr }}"><span role="alert" style="color:#B32727;font-weight:800">{{ OV.err }}</span></sc-if><sc-if value="{{ banner.show }}"><span style="color:#8C6A2B;font-weight:700">Inclui dados de demonstração.</span></sc-if></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+<sc-for list="{{ OV.metrics }}" as="m" hint-placeholder-count="8"><div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:4px"><div style="color:#4A3F66;font-size:13px;font-weight:800">{{ m.label }}</div><div style="font-size:26px;font-weight:900">{{ m.value }}</div><div style="color:#6B6380;font-size:12.5px">{{ m.sub }}</div></div></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:12px">
+<sc-for list="{{ OV.rates }}" as="r" hint-placeholder-count="2"><div style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:6px"><div style="color:#4A3F66;font-size:13px;font-weight:800">{{ r.label }}</div><div style="font-size:32px;font-weight:900;color:#8C6A2B">{{ r.value }}</div><div style="font-size:13px;font-weight:700">{{ r.formula }}</div><div style="color:#6B6380;font-size:12.5px;line-height:1.45">{{ r.note }}</div></div></sc-for>
+</div>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px 22px">
+<div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:14px"><h2 style="margin:0;font-size:16px;font-weight:900">Raio X marcados × realizados</h2><div style="display:flex;gap:14px;font-size:12.5px;color:#4A3F66"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#C9B3F2"></span>Marcados</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#B8892F"></span>Realizados</span></div></div>
+<div style="overflow-x:auto"><div style="display:flex;align-items:stretch;gap:6px;height:200px;min-width:{{ OV.chartMin }}">
+<sc-for list="{{ OV.buckets }}" as="b" hint-placeholder-count="7"><div title="{{ b.t }}" style="flex:1 0 18px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px;width:100%;border-bottom:1px solid #E4DDEF"><div style="width:42%;max-width:20px;height:{{ b.h1 }};background:#C9B3F2;border-radius:4px 4px 0 0"></div><div style="width:42%;max-width:20px;height:{{ b.h2 }};background:#B8892F;border-radius:4px 4px 0 0"></div></div><span style="font-size:11px;color:#6B6380;white-space:nowrap;height:14px">{{ b.label }}</span></div></sc-for>
+</div></div>
+<sc-if value="{{ OV.chartEmpty }}"><p style="margin:10px 0 0;color:#6B6380;font-size:13px">Sem reuniões no período.</p></sc-if>
+</section>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:12px">
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:16px;font-weight:900">Formas de pagamento</h2>
+<div style="font-size:13px;color:#4A3F66">Mais comum: <strong>{{ OV.topMethod }}</strong></div>
+<sc-for list="{{ OV.pay }}" as="p" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 28px;gap:10px;align-items:center;font-size:13px"><span>{{ p.name }}</span><div style="height:10px;border-radius:5px;background:#F1ECF9"><div style="height:10px;border-radius:5px;background:#B8892F;width:{{ p.w }}"></div></div><strong style="text-align:right">{{ p.count }}</strong></div></sc-for>
+</section>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:16px;font-weight:900">Remarketing</h2>
+<div style="font-size:12.5px;font-weight:800;color:#4A3F66">Motivos de não compra (enviados no período)</div>
+<sc-for list="{{ OV.reasons }}" as="r" hint-placeholder-count="1"><div style="display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:4px 0;border-bottom:1px solid #F4F0FA"><span>{{ r.name }}</span><strong>{{ r.count }}</strong></div></sc-for>
+<sc-if value="{{ OV.noReasons }}"><span style="color:#6B6380;font-size:13px">Sem dados no período.</span></sc-if>
+<div style="font-size:12.5px;font-weight:800;color:#4A3F66;margin-top:6px">Retornos previstos no período</div>
+<sc-for list="{{ OV.returns }}" as="r" hint-placeholder-count="1"><button onClick="{{ r.open }}" style="display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:6px 0;border:0;border-bottom:1px solid #F4F0FA;background:transparent;text-align:left;cursor:pointer;width:100%"><span style="font-weight:700;color:#8C6A2B">{{ r.name }}</span><span>{{ r.date }}</span></button></sc-for>
+<sc-if value="{{ OV.noReturns }}"><span style="color:#6B6380;font-size:13px">Nenhum retorno previsto no período.</span></sc-if>
+</section>
+</div>
+<details style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:14px;padding:14px 18px;font-size:13px;color:#4A3F66;line-height:1.55">
+<summary style="cursor:pointer;font-weight:800;color:#211638">Regras de cálculo</summary>
+<ul style="margin:10px 0 0;padding-left:18px">
+<li>Leads criados: data de cadastro. Ligações: data efetiva do resultado.</li>
+<li>Raio X marcados: data marcada; versões substituídas por reagendamento não são contadas.</li>
+<li>Realizados: data efetiva. Faltas: “não compareceu”, pela data marcada.</li>
+<li>Comparecimento: realizados ÷ (realizados + faltas) com data marcada no período. Canceladas, reagendadas, futuras e pendentes ficam fora.</li>
+<li>Fechamento (coorte): vendas vinculadas aos Raio X realizados no período ÷ esses Raio X, mesmo se a venda fechar depois.</li>
+<li>Denominador zero exibe “—”.</li>
+</ul>
+</details>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.cfg }}">
+<div style="display:flex;flex-direction:column;gap:18px;max-width:880px">
+<div><h1 style="margin:0;font-size:32px;font-weight:900;letter-spacing:-0.02em">Closers e dados</h1><p style="margin:4px 0 0;color:#4A3F66;font-size:15px">Cadastre os closers reais da equipe. O nome do operador aparece como autor no histórico.</p></div>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:17px;font-weight:900">Operador atual</h2>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><input aria-label="Nome do operador" value="{{ cfg.op }}" onChange="{{ cfg.onOp }}" maxLength="60" style="flex:1 1 240px;height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px"><button onClick="{{ cfg.saveOp }}" style="height:42px;padding:0 18px;border:0;border-radius:8px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Salvar</button></div>
+</section>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:17px;font-weight:900">Closers</h2>
+<sc-for list="{{ cfg.closers }}" as="c" hint-placeholder-count="3"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #F0EBF7"><strong style="flex:1 1 160px">{{ c.name }}</strong><span style="color:#6B6380;font-size:13px">{{ c.meta }}</span><button onClick="{{ c.toggle }}" style="height:36px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;font-weight:700;font-size:13px;cursor:pointer">{{ c.toggleLabel }}</button><sc-if value="{{ c.canRemove }}"><button onClick="{{ c.remove }}" style="height:36px;padding:0 12px;border:1px solid #E9B9B9;border-radius:8px;background:#FFFFFF;color:#9B1F1F;font-weight:700;font-size:13px;cursor:pointer">Remover</button></sc-if></div></sc-for>
+<div style="display:flex;flex-wrap:wrap;gap:10px;padding-top:6px"><input aria-label="Nome do novo closer" placeholder="Nome do closer" value="{{ cfg.newName }}" onChange="{{ cfg.onNew }}" maxLength="60" style="flex:1 1 240px;height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px"><button onClick="{{ cfg.add }}" style="height:42px;padding:0 18px;border:0;border-radius:8px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">+ Adicionar closer</button></div>
+<sc-if value="{{ errs.hasCfg }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.cfg }}</p></sc-if>
+</section>
+<section style="background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:17px;font-weight:900">Dados</h2>
+<p style="margin:0;color:#4A3F66;font-size:13.5px;line-height:1.5">{{ cfg.storage }}</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<button onClick="{{ clearDemo }}" style="height:40px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;font-weight:700;font-size:13.5px;cursor:pointer">Remover dados de demonstração</button>
+<button onClick="{{ cfg.reseed }}" style="height:40px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;font-weight:700;font-size:13.5px;cursor:pointer">Recarregar demonstração</button>
+<button onClick="{{ cfg.exportJson }}" style="height:40px;padding:0 14px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;font-weight:700;font-size:13.5px;cursor:pointer">Exportar JSON</button>
+<button onClick="{{ cfg.wipe }}" style="height:40px;padding:0 14px;border:1px solid #E9B9B9;border-radius:8px;background:#FFFFFF;color:#9B1F1F;font-weight:700;font-size:13.5px;cursor:pointer">Apagar todos os dados</button>
+</div>
+</section>
+</div>
+</sc-if>
+</main>
+</div>
+<sc-if value="{{ RM.open }}">
+<div onClick="{{ RM.cancel }}" style="position:fixed;inset:0;z-index:60;background:rgba(10,10,11,0.45);display:grid;place-items:center;padding:20px">
+<div role="dialog" aria-modal="true" aria-labelledby="h-ref" onClick="{{ RM.stop }}" onKeyDown="{{ RM.onKey }}" style="width:min(520px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(10,10,11,0.28)">
+<div><h2 id="h-ref" style="margin:0;font-size:19px;font-weight:900">Quem indicou</h2><p style="margin:4px 0 0;color:#6B6380;font-size:13.5px">Dados da pessoa que indicou este lead.</p></div>
+<div style="display:flex;align-items:center;gap:14px">
+<label aria-label="Escolher foto de quem indicou" style="position:relative;width:80px;height:80px;border-radius:50%;border:2px dashed #B8892F;background:#FBF3E4;display:grid;place-items:center;cursor:pointer;overflow:hidden;flex:none" style-hover="background:#F6E7C9">
+<sc-if value="{{ RM.hasPhoto }}"><img src="{{ f.rf_photo }}" alt="Foto escolhida" style="width:100%;height:100%;object-fit:cover"></sc-if>
+<sc-if value="{{ RM.noPhoto }}"><span style="display:flex;flex-direction:column;align-items:center;color:#8C6A2B;font-size:11.5px;font-weight:800;text-align:center;line-height:1.2"><span style="font-size:20px;line-height:1">+</span>Foto</span></sc-if>
+<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ RM.pick }}" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+</label>
+<div style="display:flex;flex-direction:column;gap:8px;color:#6B6380;font-size:12.5px"><span style="display:inline-flex;align-items:center">Foto (opcional)<span style="position:relative;display:inline-flex;vertical-align:middle"><button type="button" onClick="{{ help.rf.toggle }}" aria-expanded="{{ help.rf.exp }}" aria-label="Formatos de foto aceitos" style="display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #B8892F;color:#8C6A2B;font-size:11.5px;font-weight:800;cursor:pointer;background:#FFFFFF;padding:0;margin-left:6px;vertical-align:middle" style-hover="background:#FBF3E4">?</button><sc-if value="{{ help.rf.open }}"><span role="tooltip" style="position:absolute;left:0;top:26px;z-index:70;width:220px;padding:10px 12px;border-radius:8px;background:#0A0A0B;color:#F4F1EA;font-size:12.5px;font-weight:500;line-height:1.45;box-shadow:0 8px 24px rgba(10,10,11,0.25)">Formatos aceitos: JPG, PNG ou WEBP.<br>Tamanho máximo: 5 MB.</span></sc-if></span></span><sc-if value="{{ RM.hasPhoto }}"><button type="button" onClick="{{ RM.rmPhoto }}" style="align-self:flex-start;height:30px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-weight:700;font-size:12.5px;cursor:pointer">Remover foto</button></sc-if></div>
+</div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638">Nome *<input value="{{ f.rf_name }}" onChange="{{ on.rf_name }}" maxLength="120" autoFocus="" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span id="lb-ph-rf">Telefone / WhatsApp *</span>
+<div style="position:relative">
+<div role="group" aria-labelledby="lb-ph-rf" style="display:flex;height:42px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;overflow:hidden" style-focus-within="border-color:#B8892F">
+<button type="button" onClick="{{ ddi.rf.toggle }}" aria-haspopup="listbox" aria-expanded="{{ ddi.rf.exp }}" aria-label="Código do país: {{ ddi.rf.name }}" style="flex:none;width:84px;height:100%;display:flex;align-items:center;gap:6px;padding:0 10px 0 12px;border:0;border-right:1px solid #E4DDEF;background:#F8F7FD;color:#211638;font-size:14px;font-weight:700;cursor:pointer"><span>{{ ddi.rf.codeLabel }}</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" style="margin-left:auto"><path d="M2 3.5l3 3 3-3" fill="none" stroke="#4A3F66" stroke-width="1.4"></path></svg></button>
+<input type="tel" aria-label="Número com DDD" value="{{ f.rf_phone }}" onChange="{{ on.rf_phone }}" placeholder="{{ ptype.rfPh }}" style="flex:1;min-width:0;height:100%;padding:0 12px;border:0;background:transparent;color:#211638;font-size:14px;outline:none">
+</div>
+<sc-if value="{{ ddi.rf.open }}">
+<div onClick="{{ ddi.stop }}" style="position:absolute;left:0;top:46px;z-index:70;width:min(300px,100%);min-width:260px;background:#FFFFFF;border:1px solid #E4DDEF;border-radius:10px;box-shadow:0 12px 32px rgba(10,10,11,0.16);padding:8px;display:flex;flex-direction:column;gap:6px">
+<input ref="{{ ddi.focusRef }}" aria-label="Buscar país ou código" placeholder="Digite o país ou o código" value="{{ ddi.q }}" onChange="{{ ddi.onQ }}" onKeyDown="{{ ddi.rf.onKey }}" style="height:38px;padding:0 10px;border:1px solid #D9D0E8;border-radius:8px;background:#FFFFFF;color:#211638;font-size:14px;font-weight:500;width:100%" style-focus="border-color:#B8892F;outline:none">
+<div role="listbox" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column">
+<sc-for list="{{ ddi.rf.items }}" as="c" hint-placeholder-count="0"><button type="button" role="option" aria-selected="{{ c.sel }}" onClick="{{ c.pick }}" style="flex:none;display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;border:0;border-radius:6px;background:{{ c.bg }};color:#211638;font-size:14px;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#F4F0FB"><span style="width:48px;font-weight:700">{{ c.codeLabel }}</span><span>{{ c.name }}</span></button></sc-for>
+<sc-if value="{{ ddi.empty }}"><p style="margin:0;padding:10px;color:#6B6380;font-size:13px;font-weight:500">Nenhum país encontrado para “{{ ddi.q }}”.</p></sc-if>
+</div>
+</div>
+</sc-if>
+</div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:#211638"><span>E-mail<span style="font-size:11.5px;font-weight:500;color:#6B6380;margin-left:4px">(opcional)</span></span><input type="email" value="{{ f.rf_email }}" onChange="{{ on.rf_email }}" style="height:42px;padding:0 12px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-size:14px;width:100%"></label>
+<sc-if value="{{ errs.hasRf }}"><p role="alert" style="margin:0;color:#B32727;font-size:13.5px;font-weight:800">{{ errs.rf }}</p></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end">
+<button type="button" onClick="{{ RM.cancel }}" style="height:42px;padding:0 16px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14px;cursor:pointer">Cancelar</button>
+<button type="button" onClick="{{ RM.save }}" style="height:42px;padding:0 20px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Salvar</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ DV.open }}">
+<div onClick="{{ DV.close }}" style="position:fixed;inset:0;z-index:65;background:rgba(10,10,11,0.45);display:grid;place-items:center;padding:20px">
+<div role="dialog" aria-modal="true" aria-labelledby="h-dv" onClick="{{ DV.stop }}" onKeyDown="{{ DV.onKey }}" style="width:min(520px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#FFFFFF;border:1px solid #E4DDEF;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(10,10,11,0.28)">
+<div style="display:flex;align-items:center;gap:14px">
+<sc-if value="{{ DV.hasPhoto }}"><img src="{{ DV.photo }}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none"></sc-if>
+<sc-if value="{{ DV.noPhoto }}"><div aria-hidden="true" style="width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FBF3E4,#EBD7AE);color:#5E4416;font-weight:900;font-size:20px">{{ DV.initials }}</div></sc-if>
+<div style="min-width:0"><h2 id="h-dv" style="margin:0;font-size:20px;font-weight:900">{{ DV.name }}</h2><div style="color:#6B6380;font-size:13px">{{ DV.sub }}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 12px;font-size:14px">
+<sc-for list="{{ DV.rows }}" as="r" hint-placeholder-count="8"><span style="color:#6B6380;white-space:nowrap">{{ r.k }}</span><span style="color:{{ r.c }};font-weight:{{ r.w }};overflow-wrap:anywhere">{{ r.v }}</span></sc-for>
+<span style="color:#6B6380">Situação</span><span style="display:flex;flex-wrap:wrap;gap:6px"><span style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;font-size:12.5px;font-weight:700;background:{{ DV.comB.bg }};color:{{ DV.comB.fg }}">{{ DV.comB.label }}</span><span style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;font-size:12.5px;font-weight:700;background:{{ DV.callB.bg }};color:{{ DV.callB.fg }}">{{ DV.callText }}</span></span>
+<span style="color:#6B6380">Próxima ação</span><span style="font-weight:700">{{ DV.next }}</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end">
+<button type="button" onClick="{{ DV.close }}" style="height:42px;padding:0 16px;border:1px solid #D9D0E8;border-radius:10px;background:#FFFFFF;color:#211638;font-weight:700;font-size:14px;cursor:pointer">Fechar</button>
+<sc-if value="{{ DV.showOpen }}"><button type="button" onClick="{{ DV.openLead }}" style="height:42px;padding:0 20px;border:0;border-radius:10px;background:linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%);color:#211638;font-weight:800;font-size:14px;cursor:pointer">Abrir ficha completa</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ toast.show }}"><div role="status" aria-live="polite" style="position:fixed;right:20px;bottom:20px;z-index:50;max-width:min(400px,calc(100vw - 40px));padding:14px 18px;border-radius:12px;background:{{ toast.bg }};color:#FFFFFF;font-weight:800;font-size:14px;box-shadow:0 12px 32px rgba(10,10,11,0.25)">{{ toast.msg }}</div></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DDIS=[['55','Brasil'],['1','Estados Unidos / Canadá'],['351','Portugal'],['54','Argentina'],['595','Paraguai'],['598','Uruguai'],['56','Chile'],['591','Bolívia'],['51','Peru'],['57','Colômbia'],['58','Venezuela'],['593','Equador'],['52','México'],['506','Costa Rica'],['507','Panamá'],['34','Espanha'],['39','Itália'],['33','França'],['49','Alemanha'],['44','Reino Unido'],['353','Irlanda'],['41','Suíça'],['32','Bélgica'],['31','Países Baixos'],['43','Áustria'],['45','Dinamarca'],['46','Suécia'],['47','Noruega'],['48','Polônia'],['7','Rússia'],['90','Turquia'],['972','Israel'],['971','Emirados Árabes'],['966','Arábia Saudita'],['20','Egito'],['27','África do Sul'],['244','Angola'],['258','Moçambique'],['238','Cabo Verde'],['91','Índia'],['86','China'],['81','Japão'],['82','Coreia do Sul'],['61','Austrália'],['64','Nova Zelândia']];
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const KEY='crmCloser.v3',UIKEY='crmCloser.ui';
+const UIKEYS=['leadTab','view','leadId','backTo','filter','search','nlOpen','editing','callMode','f','refModal','cal','mini','ov'];
+const TZ='America/Sao_Paulo';
+const GOLD='linear-gradient(135deg,#F1D58A 0%,#C9A24A 50%,#A57A2C 100%)';
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const fmtK=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'});
+const fmtT=new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+const dKey=iso=>fmtK.format(new Date(iso));
+const tStr=iso=>fmtT.format(new Date(iso));
+const kFull=k=>{if(!k)return '—';const p=k.split('-');return p[2]+'/'+p[1]+'/'+p[0]};
+const kShort=k=>{const p=k.split('-');return p[2]+'/'+p[1]};
+const dStr=iso=>kFull(dKey(iso));
+const dtStr=iso=>iso?dStr(iso)+' às '+tStr(iso):'—';
+const dtShort=iso=>iso?kShort(dKey(iso))+' às '+tStr(iso):'—';
+const toISO=(d,t)=>new Date(d+'T'+(t||'00:00')+':00-03:00').toISOString();
+const nowISO=()=>new Date().toISOString();
+const today=()=>dKey(nowISO());
+const addD=(k,n)=>{const x=new Date(k+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
+const wd=k=>new Date(k+'T12:00:00Z').getUTCDay();
+const monday=k=>addD(k,-((wd(k)+6)%7));
+const monthShift=(k,n)=>{let y=+k.slice(0,4),m=+k.slice(5,7)+n;while(m<1){m+=12;y--}while(m>12){m-=12;y++}return y+'-'+String(m).padStart(2,'0')+'-01'};
+const localInput=iso=>dKey(iso)+'T'+tStr(iso);
+const brl=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const pct=(n,d)=>d?(Math.round(n/d*1000)/10).toLocaleString('pt-BR')+'%':'—';
+const pl=(n,s,p)=>n+' '+(n===1?s:p);
+const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],WDL=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const METHODS=['Pix','Cartão à vista','Cartão parcelado','Boleto','Transferência'];
+const PH="<path d='M3.2 1.8h2.6l1.3 3.3-1.7 1.1a8.5 8.5 0 0 0 4.4 4.4l1.1-1.7 3.3 1.3v2.6a1.4 1.4 0 0 1-1.5 1.4C6.9 13.8 2.2 9.1 1.8 3.3a1.4 1.4 0 0 1 1.4-1.5z'/>";
+const PATHS={user:"<circle cx='8' cy='5' r='3'/><path d='M2.5 14.5c0-3.2 2.5-5 5.5-5s5.5 1.8 5.5 5'/>",users:"<circle cx='6' cy='5.5' r='2.5'/><path d='M1.5 13.5c0-2.6 2-4 4.5-4s4.5 1.4 4.5 4'/><circle cx='11.5' cy='5' r='2'/><path d='M11 9.5c2 0 3.5 1.2 3.5 3.5'/>",phone:PH,phoneX:PH+"<path d='M10.5 1.5l3.5 3.5M14 1.5l-3.5 3.5'/>",phonePlus:PH+"<path d='M12 1v5M9.5 3.5h5'/>",cal:"<rect x='2' y='3' width='12' height='11' rx='2'/><path d='M2 7h12M5.5 1.5v3M10.5 1.5v3'/>",refresh:"<path d='M13.5 8a5.5 5.5 0 1 1-1.6-3.9'/><path d='M13 1.5v3.2H9.8'/>",mega:"<path d='M2 6.5v3h2.5L11 13V3L4.5 6.5z'/><path d='M13 6.5a2 2 0 0 1 0 3'/><path d='M5 9.5l1 4'/>",bars:"<path d='M2 14.5h12M4 12V8M8 12V3.5M12 12V6'/>",money:"<rect x='1.5' y='4' width='13' height='8' rx='1.5'/><circle cx='8' cy='8' r='2'/>",check:"<path d='M3 8.5l3 3 7-7'/>",checkC:"<circle cx='8' cy='8' r='6.5'/><path d='M5.2 8.2l1.9 1.9 3.7-3.8'/>",x:"<path d='M4 4l8 8M12 4l-8 8'/>",ban:"<circle cx='8' cy='8' r='6.5'/><path d='M3.4 3.4l9.2 9.2'/>",clock:"<circle cx='8' cy='8' r='6.5'/><path d='M8 4.5V8l2.5 1.5'/>",info:"<circle cx='8' cy='8' r='6.5'/><path d='M8 7.2v4M8 4.8v.1'/>",pencil:"<path d='M10.8 2.2l3 3L5.5 13.5H2.5v-3z'/>",target:"<circle cx='8' cy='8' r='6.5'/><circle cx='8' cy='8' r='3.5'/><circle cx='8' cy='8' r='.8'/>",chev:"<path d='M6 3l5 5-5 5'/>",chevL:"<path d='M10 3L5 8l5 5'/>",back:"<path d='M13.5 8h-11M6.5 4l-4 4 4 4'/>",monitor:"<rect x='1.5' y='2.5' width='13' height='9' rx='1.5'/><path d='M5.5 14h5M8 11.5V14'/>",mail:"<rect x='1.5' y='3.5' width='13' height='9' rx='1.5'/><path d='M2 4.5l6 4.5 6-4.5'/>",search:"<circle cx='7' cy='7' r='4.8'/><path d='M10.5 10.5L14 14'/>",plus:"<path d='M8 2.5v11M2.5 8h11'/>",dots:"<circle cx='8' cy='3' r='.6'/><circle cx='8' cy='8' r='.6'/><circle cx='8' cy='13' r='.6'/>",list:"<rect x='2.5' y='2' width='11' height='12.5' rx='1.5'/><path d='M5 1v2.5M11 1v2.5M5 7.5h6M5 10.5h4'/>",alert:"<path d='M8 1.8l6.5 12H1.5z'/><path d='M8 6.5v3.5M8 11.8v.1'/>"};
+const ICO={};const ico=(n,c)=>{const k=n+c;return ICO[k]||(ICO[k]='data:image/svg+xml;utf8,'+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='"+c+"' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'>"+PATHS[n]+"</svg>"))};
+const GT='#8C6A2B',INK='#211638';
+const BADGE={agendada:['Agendada','#FBF0DA','#7A5A1E','phone'],confirmada:['Confirmada','#F1DFB8','#5E4416','checkC'],atendeu:['Atendeu','#DFF5E7','#1B7A42','check'],realizada:['Realizada','#DFF5E7','#1B7A42','checkC'],vendido:['Vendido','#DFF5E7','#1B7A42','money'],nao_atendeu:['Não atendida','#FDE7E7','#B32727','phoneX'],nao_compareceu:['Não compareceu','#FDE7E7','#B32727','x'],cancelada:['Cancelada','#FDE7E7','#B32727','ban'],reagendada:['Reagendada','#EFE5FD','#6526C0','refresh'],remarketing:['Remarketing','#FFEBD8','#A84B08','mega'],andamento:['Em andamento','#EEEAF6','#4A3F66','clock'],desqualificado:['Desqualificado','#ECEBEF','#55525E','ban'],nao_marcada:['Não marcada','#EEEDF2','#5E5873','cal'],sem_ligacao:['Sem ligação','#EEEDF2','#5E5873','phone'],pendente:['Retorno pendente','#FFEBD8','#A84B08','clock'],contatado:['Contatado','#FBF0DA','#7A5A1E','phone'],convertido:['Convertido','#DFF5E7','#1B7A42','money'],encerrado:['Encerrado','#ECEBEF','#55525E','x']};
+const bd=(s,mt)=>{const b=BADGE[s]||[s,'#EEEDF2','#5E5873','clock'];const ic=mt&&s==='agendada'?'cal':b[3];return {label:b[0],bg:b[1],fg:b[2],icon:ico(ic,b[2])}};
+const initials=n=>{const p=(n||'?').trim().split(/\s+/);return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase()};
+const byC=(a,b)=>a.createdAt<b.createdAt?-1:a.createdAt>b.createdAt?1:0;
+const lastCallOf=(d,lid)=>d.calls.filter(x=>x.leadId===lid).sort(byC).slice(-1)[0];
+const lastMOf=(d,lid)=>d.meetings.filter(x=>x.leadId===lid).sort(byC).slice(-1)[0];
+const isAct=m=>m&&(m.status==='agendada'||m.status==='confirmada');
+function addEv(d,leadId,type,text,x,at){x=x||{};d.events.push({id:uid(),leadId,type,text,detail:x.detail||'',from:x.from||'',to:x.to||'',reason:x.reason||'',author:x.author||(d.settings&&d.settings.operator)||'Operador',at:at||nowISO()})}
+function seed(){
+  const T=today(),at=(n,h)=>toISO(addD(T,n),h);
+  const d={v:2,settings:{operator:'Operador'},closers:[{id:'c1',name:'Carlos',active:true,demo:false},{id:'c2',name:'Ana',active:true,demo:false},{id:'c3',name:'Ricardo',active:true,demo:false}],leads:[],calls:[],meetings:[],sales:[],rmk:[],events:[]};
+  return d;
+  const id=uid(),c=at(-1,'09:10'),s=at(1,'14:30');
+  d.leads.push({id,name:'Mariana Oliveira',phone:'(45) 99999-1234',email:'mariana@exemplo.com',city:'Cascavel - PR',age:36,origin:'Site',photo:'',summary:'Tem 36 anos, busca melhorar sua gestão comercial, quer aumentar o faturamento da empresa nos próximos meses e se mostrou interessada na solução do CRM.',commercial:'andamento',closerId:'',dqReason:'',createdAt:c,updatedAt:c,demo:true});
+  addEv(d,id,'lead','Lead cadastrado',null,c);
+  d.calls.push({id:uid(),leadId:id,scheduledAt:s,status:'agendada',reason:'',doneAt:null,rescheduledFrom:null,createdAt:at(-1,'09:12'),updatedAt:at(-1,'09:12')});
+  addEv(d,id,'ligacao','Ligação agendada',{to:dtStr(s)},at(-1,'09:12'));
+  return d}
+function mig(d){let mx=d.leads.reduce((a,l)=>Math.max(a,l.seq||0),0);d.leads.filter(l=>!l.seq).sort((a,b)=>a.createdAt<b.createdAt?-1:1).forEach(l=>{l.seq=++mx})}
+function load(){let d=null;try{const s=localStorage.getItem(KEY);if(s){d=JSON.parse(s);if(d&&d.leads){mig(d);return {d,ok:true}}}}catch(e){return {d:seed(),ok:false}}d=seed();try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){return {d,ok:false}}return {d,ok:true}}
+function pre(d,lid){const lc=lastCallOf(d,lid),am=lastMOf(d,lid),sc=lc&&lc.status==='agendada',ma=isAct(am);return {callDate:sc?dKey(lc.scheduledAt):'',callTime:sc?tStr(lc.scheduledAt):'',mxDate:ma?dKey(am.scheduledAt):'',mxTime:ma?tStr(am.scheduledAt):'',mxCloser:ma?am.closerId:'',mxStatus:ma?am.status:'',mxDur:ma?String(am.duration||60):'60'}}
+function initF(l,d){l=l||{};const base={nl_name:'',nl_phone:'',nl_ddi:'55',nl_nat:'nacional',nl_email:'',nl_city:'',nl_age:'',nl_origin:'',nl_refName:'',nl_refPhone:'',nl_refEmail:'',nl_refDdi:'55',nl_refPhoto:'',rf_name:'',rf_phone:'',rf_ddi:'55',rf_email:'',rf_photo:'',nl_photo:'',ed_name:l.name||'',ed_phone:l.phone||'',ed_ddi:l.ddi||'55',ed_nat:(l.ddi||'55')==='55'?'nacional':'internacional',ed_email:l.email||'',ed_city:l.city||'',ed_age:(l.age||l.age===0)?String(l.age):'',ed_origin:l.origin||'',ed_refName:l.refName||'',ed_refPhone:l.refPhone||'',ed_refEmail:l.refEmail||'',ed_refDdi:l.refDdi||'55',ed_refPhoto:l.refPhoto||'',ed_photo:l.photo||'',summary:l.summary||'',callDate:'',callTime:'',naReason:'',naOther:'',rsReason:'',mxDate:'',mxTime:'',mxCloser:'',mxDur:'60',mxStatus:'',mxReason:'',mxDone:localInput(nowISO()),res:l.commercial||'andamento',saleAmount:'',saleMethod:'',saleDate:today(),rmkReason:'',rmkDate:'',dqReason:''};return l.id&&d?Object.assign(base,pre(d,l.id)):base}
+const FKEYS=Object.keys(initF());
+function findDup(f,p,d,selfId){const dg=(f[p+'phone']||'').replace(/\D/g,''),em=(f[p+'email']||'').trim().toLowerCase();return d.leads.find(l=>l.id!==selfId&&((dg&&l.phone&&l.phone.replace(/\D/g,'')===dg)||(em&&l.email&&l.email.toLowerCase()===em)))||null}
+function vContact(f,p,d,selfId){const name=(f[p+'name']||'').trim(),phone=(f[p+'phone']||'').trim(),email=(f[p+'email']||'').trim(),age=String(f[p+'age']||'').trim();
+  if(name.length<2)return 'Informe o nome (mínimo 2 caracteres).';
+  const city=(f[p+'city']||'').trim(),origin=f[p+'origin']||'';
+  if(!phone)return 'Informe o telefone/WhatsApp.';
+  if(!email)return 'Informe o e-mail.';
+  if(!origin)return 'Selecione a origem.';
+  if(origin==='Indicação'){const rn=(f[p+'refName']||'').trim(),rp=(f[p+'refPhone']||'').trim(),rd=rp.replace(/\D/g,''),rdi=f[p+'refDdi']||'55';if(rn.length<2)return 'Informe o nome de quem indicou.';if(rdi==='55'?(rd.length<10||rd.length>11):(rd.length<6||rd.length>14))return 'Telefone de quem indicou inválido. Abra “Editar indicação” e corrija.'}
+  const dg=phone.replace(/\D/g,'');
+  const ddi=f[p+'ddi']||'55';
+  if(ddi==='55'){if(dg.length<10||dg.length>11)return 'Informe DDD + número (10 ou 11 dígitos).'}
+  else if(dg.length<6||dg.length>14)return 'Número internacional inválido: informe o número sem o código do país (6 a 14 dígitos).';
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return 'E-mail inválido.';
+  if(age){const a=Number(age);if(!Number.isInteger(a)||a<0||a>120)return 'Idade deve ser um número inteiro entre 0 e 120.'}
+  const dup=d.leads.find(l=>l.id!==selfId&&((dg&&l.phone&&l.phone.replace(/\D/g,'')===dg)||(email&&l.email&&l.email.toLowerCase()===email.toLowerCase())));
+  if(dup)return 'Já existe um lead com este contato: '+dup.name+'.';
+  return null}
+const parseAmount=v=>{let s=String(v||'').replace(/[R$\s]/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=Number(s);return isFinite(n)?Math.round(n*100)/100:NaN};
+
+class Component extends DCLogic {
+  state=(()=>{const r=load(),T=today();let u={};try{u=JSON.parse(localStorage.getItem(UIKEY)||'{}')||{}}catch(e){u={}}
+    const okLead=u.leadId&&r.d.leads.some(l=>l.id===u.leadId);
+    const base={data:r.d,storageOk:r.ok,view:'leads',leadId:null,backTo:'leads',filter:'todos',search:'',nlOpen:false,editing:false,callMode:null,f:initF(),errs:{},toast:null,cal:{mode:'semana',anchor:T,closer:'all'},mini:T.slice(0,8)+'01',ov:{period:'semana',closer:'all',from:addD(T,-29),to:T},closerNew:'',opName:(r.d.settings&&r.d.settings.operator)||''};
+    UIKEYS.forEach(k=>{if(u[k]!==undefined)base[k]=u[k]});
+    base.f=Object.assign(initF(),u.f||{});if(!okLead){base.leadId=null;base.editing=false;base.callMode=null}
+    this._scroll=u.scrollY||0;return base})();
+  saveUI(){clearTimeout(this._ui);this._ui=setTimeout(()=>{const s=this.state,o={scrollY:window.scrollY};UIKEYS.forEach(k=>o[k]=s[k]);try{localStorage.setItem(UIKEY,JSON.stringify(o))}catch(e){try{o.f={...o.f,nl_photo:'',ed_photo:'',rf_photo:'',nl_refPhoto:'',ed_refPhoto:''};localStorage.setItem(UIKEY,JSON.stringify(o))}catch(_){}}},250)}
+  componentDidUpdate(){this.saveUI()}
+  componentDidMount(){this._sc=()=>this.saveUI();window.addEventListener('scroll',this._sc,{passive:true});if(this._scroll){const y=this._scroll;setTimeout(()=>window.scrollTo(0,y),60);setTimeout(()=>window.scrollTo(0,y),400)}this._hc=()=>{if(this.state.help||this.state.ddiOpen)this.setState({help:null,ddiOpen:null,ddiQ:''})};document.addEventListener('click',this._hc);this._t=setInterval(()=>this.forceUpdate(),60000);this._st=e=>{if(e.key===KEY&&e.newValue){try{this.setState({data:JSON.parse(e.newValue)})}catch(_){}}};window.addEventListener('storage',this._st);if(!this.state.storageOk)this.toast('Armazenamento do navegador indisponível: alterações não serão mantidas ao recarregar.','err')}
+  componentWillUnmount(){window.removeEventListener('scroll',this._sc);clearTimeout(this._ui);document.removeEventListener('click',this._hc);clearInterval(this._t);clearTimeout(this._tt);window.removeEventListener('storage',this._st)}
+  toast(msg,kind){clearTimeout(this._tt);this.setState({toast:{msg,kind:kind||'ok'}});this._tt=setTimeout(()=>this.setState({toast:null}),4000)}
+  setF=(k,v)=>this.setState(s=>({f:{...s.f,[k]:v}}));
+  setErr(k,m){this.setState(s=>({errs:{...s.errs,[k]:m}}));return false}
+  clr(keys,ek,extra){const base=initF();this.setState(s=>{const f={...s.f};keys.forEach(k=>f[k]=base[k]);return Object.assign({f,errs:{...s.errs,[ek]:''}},extra||{})})}
+  commit(fn,msg,ek){const d=JSON.parse(JSON.stringify(this.state.data));if(fn(d)===false)return false;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){this.toast('Não foi possível salvar (armazenamento cheio ou bloqueado). Nada foi alterado.','err');return false}
+    const lid=this.state.leadId;this.setState(s=>({data:d,storageOk:true,errs:ek?{...s.errs,[ek]:''}:s.errs,f:lid&&d.leads.some(l=>l.id===lid)?{...s.f,...pre(d,lid),naReason:'',naOther:'',rsReason:'',mxReason:'',mxDone:localInput(nowISO())}:s.f}));if(msg)this.toast(msg);return true}
+  cur(){return this.state.data.leads.find(l=>l.id===this.state.leadId)}
+  touch(d,id){const l=d.leads.find(x=>x.id===id);if(l)l.updatedAt=nowISO();return l}
+  cName(d,id){const c=d.closers.find(x=>x.id===id);return c?c.name:'—'}
+  go=k=>{this.setState({view:k,leadId:null,editing:false,callMode:null});window.scrollTo(0,0)};
+  openLead=id=>{const D=this.state.data,l=D.leads.find(x=>x.id===id);if(!l)return;const lc0=lastCallOf(D,id),lm0=lastMOf(D,id);this.setState(s=>({callEdit:false,histOpen:false,leadTab:(lm0||(lc0&&lc0.status==='atendeu'))?'rx':'lig',leadId:id,backTo:s.leadId?s.backTo:(s.view==='cfg'?'leads':s.view),editing:false,callMode:null,errs:{},f:initF(l,D)}));window.scrollTo(0,0)};
+  back=()=>{this.setState(s=>({leadId:null,view:s.backTo,editing:false}));window.scrollTo(0,0)};
+  pickPhoto(key,e){const file=e.target.files&&e.target.files[0];if(!file)return;
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)){const ext=(file.name.split('.').pop()||'').toUpperCase();this.toast('Foto não enviada: o arquivo '+(ext?'.'+ext:'escolhido')+' não é aceito. Use JPG, PNG ou WEBP.','err');e.target.value='';return}
+    if(file.size>5*1024*1024){this.toast('Foto não enviada: o arquivo tem '+(file.size/1048576).toFixed(1).replace('.',',')+' MB e o limite é 5 MB.','err');e.target.value='';return}
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{const S=256,c=document.createElement('canvas');c.width=S;c.height=S;const m=Math.min(img.width,img.height);c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S);URL.revokeObjectURL(url);this.setF(key,c.toDataURL('image/jpeg',0.82))};
+    img.onerror=()=>{URL.revokeObjectURL(url);this.toast('Foto não enviada: o arquivo está corrompido ou não é uma imagem válida.','err')};img.src=url}
+  openRef(p){this.setState(s=>({refModal:p,errs:{...s.errs,rf:''},f:{...s.f,rf_name:s.f[p+'_refName']||'',rf_phone:s.f[p+'_refPhone']||'',rf_ddi:s.f[p+'_refDdi']||'55',rf_email:s.f[p+'_refEmail']||'',rf_photo:s.f[p+'_refPhoto']||''}}))}
+  onOrigin(p,v){this.setState(s=>({f:{...s.f,[p+'_origin']:v}}));if(v==='Indicação')this.openRef(p)}
+  saveRef=()=>{const f=this.state.f,p=this.state.refModal,n=f.rf_name.trim(),ph=f.rf_phone.trim(),dg=ph.replace(/\D/g,''),em=f.rf_email.trim();
+    if(n.length<2)return this.setErr('rf','Informe o nome de quem indicou.');const rd=f.rf_ddi||'55';if(rd==='55'){if(dg.length<10||dg.length>11)return this.setErr('rf','Informe DDD + número (10 ou 11 dígitos).')}else if(dg.length<6||dg.length>14)return this.setErr('rf','Número internacional inválido: informe o número sem o código do país (6 a 14 dígitos).');if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return this.setErr('rf','E-mail inválido.');
+    this.setState(s=>({refModal:null,errs:{...s.errs,rf:''},f:{...s.f,[p+'_refName']:n,[p+'_refPhone']:ph,[p+'_refDdi']:f.rf_ddi||'55',[p+'_refEmail']:em,[p+'_refPhoto']:f.rf_photo}}))};
+  cancelRef=()=>{const p=this.state.refModal;if(!p)return;this.setState(s=>({refModal:null,errs:{...s.errs,rf:''},f:(s.f[p+'_refName']||'').trim()?s.f:{...s.f,[p+'_origin']:''}}))};
+  createLead=e=>{if(e)e.preventDefault();const f=this.state.f;const er=vContact(f,'nl_',this.state.data,null);const dp=findDup(f,'nl_',this.state.data,null);this.setState({dupId:dp&&er&&er.indexOf('Já existe')===0?dp.id:null,dupFor:'nl'});if(er)return this.setErr('nl',er);
+    const id=uid(),n=nowISO(),name=f.nl_name.trim();
+    if(this.commit(d=>{const seq=d.leads.reduce((a,l)=>Math.max(a,l.seq||0),0)+1;d.leads.push({id,seq,name,phone:f.nl_phone.trim(),ddi:f.nl_ddi||'55',nat:(f.nl_ddi||'55')==='55'?'nacional':'internacional',email:f.nl_email.trim(),city:f.nl_city.trim(),age:f.nl_age!==''?Number(f.nl_age):'',origin:f.nl_origin,refName:f.nl_origin==='Indicação'?f.nl_refName.trim():'',refPhone:f.nl_origin==='Indicação'?f.nl_refPhone.trim():'',refEmail:f.nl_origin==='Indicação'?f.nl_refEmail.trim():'',refDdi:f.nl_origin==='Indicação'?(f.nl_refDdi||'55'):'',refPhoto:f.nl_origin==='Indicação'?f.nl_refPhoto:'',photo:f.nl_photo,summary:'',commercial:'andamento',closerId:'',dqReason:'',createdAt:n,updatedAt:n,demo:false});addEv(d,id,'lead','Lead cadastrado')},'Lead criado: '+name))
+      this.clr(['nl_name','nl_phone','nl_email','nl_city','nl_age','nl_origin','nl_refName','nl_refPhone','nl_refEmail','nl_refPhoto','nl_photo'],'nl',{nlOpen:false,filter:'todos',search:''})};
+  saveEdit=e=>{if(e)e.preventDefault();const f=this.state.f,l=this.cur();const er=vContact(f,'ed_',this.state.data,l.id);const dp=findDup(f,'ed_',this.state.data,l.id);this.setState({dupId:dp&&er&&er.indexOf('Já existe')===0?dp.id:null,dupFor:'ed'});if(er)return this.setErr('ed',er);
+    this.commit(d=>{const x=this.touch(d,l.id);const ch=[];[['name','ed_name','Nome'],['ddi','ed_ddi','Código do país'],['nat','ed_nat','Nacionalidade'],['phone','ed_phone','Telefone'],['email','ed_email','E-mail'],['city','ed_city','Cidade'],['origin','ed_origin','Origem'],['refName','ed_refName','Quem indicou'],['refPhone','ed_refPhone','Telefone de quem indicou'],['refEmail','ed_refEmail','E-mail de quem indicou'],['refDdi','ed_refDdi','Código do país de quem indicou'],['refPhoto','ed_refPhoto','Foto de quem indicou']].forEach(([k,fk,lab])=>{const v=(fk.indexOf('ed_ref')===0&&f.ed_origin!=='Indicação')?'':(f[fk]||'').trim();if((x[k]||'')!==v){ch.push(lab);x[k]=v}});const age=f.ed_age!==''?Number(f.ed_age):'';if(x.age!==age){ch.push('Idade');x.age=age}if((x.photo||'')!==f.ed_photo){ch.push('Foto');x.photo=f.ed_photo}if(!ch.length)return false;addEv(d,l.id,'dados','Dados editados',{detail:ch.join(', ')})},'Dados atualizados','ed');this.setState({editing:false})};
+  scheduleCall=()=>{const f=this.state.f,l=this.cur();if(!f.callDate||!f.callTime)return this.setErr('call','Informe data e horário da ligação.');const iso=toISO(f.callDate,f.callTime);if(isNaN(Date.parse(iso)))return this.setErr('call','Data inválida.');if(iso<new Date(Date.now()-5*60e3).toISOString())return this.setErr('call','O horário escolhido já passou.');
+    this.commit(d=>{const n=nowISO();d.calls.push({id:uid(),leadId:l.id,scheduledAt:iso,status:'agendada',reason:'',doneAt:null,rescheduledFrom:null,createdAt:n,updatedAt:n});this.touch(d,l.id);addEv(d,l.id,'ligacao','Ligação agendada',{to:dtStr(iso)})},'Ligação agendada para '+dtStr(iso),'call')};
+  callAnswered=()=>{const l=this.cur();this.commit(d=>{const c=lastCallOf(d,l.id);const ed=this.state.callEdit;if(!c||!(c.status==='agendada'||(ed&&c.status==='nao_atendeu')))return false;const was=c.status;const n=nowISO();c.status='atendeu';c.reason='';c.doneAt=n;c.updatedAt=n;this.touch(d,l.id);addEv(d,l.id,'ligacao',was==='agendada'?'Ligação atendida · contato realizado':'Resultado da ligação alterado para Atendeu',{detail:was==='agendada'?'':'Antes: Não atendeu'})},'Contato registrado. Preencha o resumo do lead.','call');this.setState({callMode:null,callEdit:false})};
+  callNotAnswered=()=>{const f=this.state.f,l=this.cur();const reason=f.naReason==='Outro'?f.naOther.trim():f.naReason;if(!reason)return this.setErr('call','Selecione o motivo.');
+    if(this.commit(d=>{const c=lastCallOf(d,l.id);const ed=this.state.callEdit;if(!c||!(c.status==='agendada'||(ed&&(c.status==='atendeu'||c.status==='nao_atendeu'))))return false;const was=c.status;const n=nowISO();c.status='nao_atendeu';c.reason=reason;c.doneAt=n;c.updatedAt=n;this.touch(d,l.id);addEv(d,l.id,'ligacao',was==='agendada'?'Ligação não atendida':'Resultado da ligação alterado para Não atendeu',{reason,detail:was==='agendada'?'':'Antes: '+(was==='atendeu'?'Atendeu':'Não atendeu')})},'Tentativa registrada. Lead enviado para Reagendar ligação.','call'))this.setState({callMode:null,callEdit:false})};
+  callReschedule=()=>{const f=this.state.f,l=this.cur(),D=this.state.data,c0=lastCallOf(D,l.id);if(!c0||!(c0.status==='agendada'||this.state.callEdit))return;if(!f.callDate||!f.callTime)return this.setErr('call','Informe a nova data e horário.');const iso=toISO(f.callDate,f.callTime);if(iso===c0.scheduledAt)return this.setErr('call','Altere a data ou o horário acima.');if(!f.rsReason.trim())return this.setErr('call','Informe o motivo do reagendamento.');if(iso<nowISO())return this.setErr('call','O novo horário já passou.');
+    if(this.commit(d=>{const c=lastCallOf(d,l.id);const n=nowISO();c.status='reagendada';c.reason=f.rsReason.trim();c.updatedAt=n;d.calls.push({id:uid(),leadId:l.id,scheduledAt:iso,status:'agendada',reason:'',doneAt:null,rescheduledFrom:c.id,createdAt:n,updatedAt:n});this.touch(d,l.id);addEv(d,l.id,'ligacao','Ligação reagendada',{from:dtStr(c.scheduledAt),to:dtStr(iso),reason:f.rsReason.trim()})},'Ligação reagendada para '+dtStr(iso),'call'))this.setState({callMode:null,callEdit:false})};
+  callUndo=()=>{const l=this.cur(),D=this.state.data,c0=lastCallOf(D,l.id);if(!c0||(c0.status!=='atendeu'&&c0.status!=='nao_atendeu'))return;
+    if(c0.status==='atendeu'&&D.meetings.some(m=>m.leadId===l.id&&m.createdAt>c0.doneAt))return this.setErr('call','Não é possível alterar: já existe Raio X marcado depois deste contato. Cancele o Raio X antes.');
+    const era=c0.status==='atendeu'?'Atendeu':'Não atendeu'+(c0.reason?' ('+c0.reason+')':'');
+    this.commit(d=>{const c=lastCallOf(d,l.id);c.status='agendada';c.doneAt=null;c.reason='';c.updatedAt=nowISO();this.touch(d,l.id);addEv(d,l.id,'ligacao','Resultado da ligação desfeito',{detail:'Era: '+era+'. Ligação voltou para agendada.'})},'Resultado desfeito. Escolha Atendeu, Não atendeu ou Reagendar.','call')};
+  saveSummary=()=>{const f=this.state.f,l=this.cur();if((l.summary||'')===f.summary)return this.toast('Nenhuma alteração no resumo.');this.commit(d=>{const x=this.touch(d,l.id);x.summary=f.summary;addEv(d,l.id,'resumo','Resumo do lead atualizado')},'Resumo salvo')};
+  conflict(d,cid,iso,dur,exId){const s=Date.parse(iso),e=s+dur*60e3;return d.meetings.find(m=>m.closerId===cid&&m.id!==exId&&isAct(m)&&Date.parse(m.scheduledAt)<e&&s<Date.parse(m.scheduledAt)+(m.duration||60)*60e3)}
+  conflictMsg(D,cid,cf){const ln=(D.leads.find(x=>x.id===cf.leadId)||{}).name;return 'Conflito: '+this.cName(D,cid)+' já tem Raio X com '+ln+' em '+dtStr(cf.scheduledAt)+'.'}
+  scheduleMeeting=()=>{const f=this.state.f,l=this.cur(),D=this.state.data;if(!f.mxDate||!f.mxTime)return this.setErr('mx','Informe data e horário.');if(!f.mxCloser)return this.setErr('mx','Selecione o closer.');const iso=toISO(f.mxDate,f.mxTime);if(iso<nowISO())return this.setErr('mx','O horário escolhido já passou.');const dur=Number(f.mxDur)||60;
+    const cf=this.conflict(D,f.mxCloser,iso,dur,null);if(cf)return this.setErr('mx',this.conflictMsg(D,f.mxCloser,cf));
+    this.commit(d=>{const n=nowISO();d.meetings.push({id:uid(),leadId:l.id,closerId:f.mxCloser,scheduledAt:iso,duration:dur,status:'agendada',reason:'',doneAt:null,rescheduledFrom:null,createdAt:n,updatedAt:n});const x=this.touch(d,l.id);x.closerId=f.mxCloser;addEv(d,l.id,'raiox','Raio X agendado com '+this.cName(d,f.mxCloser),{to:dtStr(iso)+' · '+dur+' min'})},'Raio X marcado. Já aparece no calendário.','mx')};
+  updateMeeting=()=>{const f=this.state.f,l=this.cur(),D=this.state.data,st=f.mxStatus,now=nowISO();const am=lastMOf(D,l.id);if(!isAct(am))return;
+    if(!st||st===am.status)return this.setErr('mx','Selecione um novo status.');
+    if(st==='agendada')return this.setErr('mx','Para mudar o horário, use “Reagendada”.');
+    const reason=f.mxReason.trim();if(['nao_compareceu','cancelada','reagendada'].includes(st)&&!reason)return this.setErr('mx','Informe o motivo.');
+    let fn,msg;
+    if(st==='confirmada'){fn=(m,d)=>{m.status='confirmada';addEv(d,l.id,'raiox','Raio X confirmado')};msg='Raio X confirmado'}
+    else if(st==='realizada'){if(!f.mxDone||f.mxDone.length<16)return this.setErr('mx','Informe a data e hora efetivas.');const done=toISO(f.mxDone.slice(0,10),f.mxDone.slice(11,16));if(done>new Date(Date.now()+5*60e3).toISOString())return this.setErr('mx','A data efetiva não pode estar no futuro.');fn=(m,d)=>{m.status='realizada';m.doneAt=done;addEv(d,l.id,'raiox','Raio X realizado',{detail:'Data efetiva: '+dtStr(done)})};msg='Raio X registrado como realizado'}
+    else if(st==='nao_compareceu'){if(am.scheduledAt>now)return this.setErr('mx','A reunião ainda não aconteceu: não é possível registrar falta.');fn=(m,d)=>{m.status='nao_compareceu';m.reason=reason;addEv(d,l.id,'raiox','Não compareceu ao Raio X',{reason})};msg='Falta registrada'}
+    else if(st==='cancelada'){fn=(m,d)=>{m.status='cancelada';m.reason=reason;addEv(d,l.id,'raiox','Raio X cancelado',{reason,from:dtStr(m.scheduledAt)})};msg='Raio X cancelado'}
+    else if(st==='reagendada'){if(!f.mxDate||!f.mxTime)return this.setErr('mx','Informe a nova data e horário.');const iso=toISO(f.mxDate,f.mxTime),cid=f.mxCloser||am.closerId;if(iso===am.scheduledAt&&cid===am.closerId)return this.setErr('mx','Altere data, horário ou closer acima.');if(iso<now)return this.setErr('mx','O novo horário já passou.');const cf=this.conflict(D,cid,iso,am.duration||60,am.id);if(cf)return this.setErr('mx',this.conflictMsg(D,cid,cf));
+      fn=(m,d)=>{const n=nowISO();m.status='reagendada';m.reason=reason;d.meetings.push({id:uid(),leadId:l.id,closerId:cid,scheduledAt:iso,duration:m.duration||60,status:'agendada',reason:'',doneAt:null,rescheduledFrom:m.id,createdAt:n,updatedAt:n});d.leads.find(x=>x.id===l.id).closerId=cid;addEv(d,l.id,'raiox','Raio X reagendado',{from:dtStr(m.scheduledAt)+' · '+this.cName(d,m.closerId),to:dtStr(iso)+' · '+this.cName(d,cid),reason})};msg='Raio X reagendado para '+dtStr(iso)}
+    this.commit(d=>{const m=d.meetings.find(x=>x.id===am.id);fn(m,d);m.updatedAt=nowISO();this.touch(d,l.id)},msg,'mx')};
+  saveResult=()=>{const f=this.state.f,l=this.cur(),T=today(),res=f.res;const closeRmk=(d,st)=>d.rmk.filter(r=>r.leadId===l.id&&r.status!=='encerrado'&&r.status!=='convertido').forEach(r=>{r.status=st;r.updatedAt=nowISO()});
+    if(res==='andamento'){if(l.commercial==='andamento')return this.setErr('res','O lead já está em andamento.');return this.commit(d=>{const x=this.touch(d,l.id);x.commercial='andamento';closeRmk(d,'encerrado');addEv(d,l.id,'resultado','Resultado alterado para Em andamento')},'Resultado salvo','res')}
+    if(res==='vendido'){const v=parseAmount(f.saleAmount);if(!(v>0))return this.setErr('res','Informe um valor positivo.');if(!METHODS.includes(f.saleMethod))return this.setErr('res','Selecione a forma de pagamento.');if(!f.saleDate)return this.setErr('res','Informe a data do fechamento.');if(f.saleDate>T)return this.setErr('res','A data do fechamento não pode estar no futuro.');
+      const closedAt=f.saleDate===T?nowISO():toISO(f.saleDate,'12:00');
+      return this.commit(d=>{const mts=d.meetings.filter(m=>m.leadId===l.id&&m.status==='realizada').sort((a,b)=>a.doneAt<b.doneAt?-1:1);const lm=mts[mts.length-1];const x=this.touch(d,l.id);d.sales.push({id:uid(),leadId:l.id,closedAt,amount:v,method:f.saleMethod,meetingId:lm?lm.id:null,closerId:lm?lm.closerId:(x.closerId||''),createdAt:nowISO()});x.commercial='vendido';closeRmk(d,'convertido');addEv(d,l.id,'venda','Venda fechada',{detail:brl(v)+' · '+f.saleMethod+' · fechamento '+kFull(f.saleDate)})},'Venda registrada: '+brl(v),'res')}
+    if(res==='remarketing'){const reason=f.rmkReason.trim();if(!reason)return this.setErr('res','Informe o motivo de não compra.');if(!f.rmkDate)return this.setErr('res','Informe a data de novo contato.');if(f.rmkDate<T)return this.setErr('res','A data de novo contato não pode estar no passado.');
+      return this.commit(d=>{const n=nowISO();closeRmk(d,'encerrado');d.rmk.push({id:uid(),leadId:l.id,reason,returnDate:f.rmkDate,status:'pendente',createdAt:n,updatedAt:n});const x=this.touch(d,l.id);x.commercial='remarketing';addEv(d,l.id,'remarketing','Enviado para remarketing',{reason,detail:'Novo contato em '+kFull(f.rmkDate)})},'Lead em remarketing até '+kFull(f.rmkDate),'res')}
+    if(res==='desqualificado'){const r=f.dqReason.trim();if(!r)return this.setErr('res','Informe o motivo da desqualificação.');
+      return this.commit(d=>{const x=this.touch(d,l.id);x.commercial='desqualificado';x.dqReason=r;closeRmk(d,'encerrado');addEv(d,l.id,'resultado','Lead desqualificado',{reason:r})},'Lead desqualificado','res')}};
+  rmkContact(lid){this.commit(d=>{const r=d.rmk.filter(x=>x.leadId===lid&&x.status==='pendente').slice(-1)[0];if(!r)return false;r.status='contatado';r.updatedAt=nowISO();this.touch(d,lid);addEv(d,lid,'remarketing','Contato de remarketing registrado')},'Contato registrado')}
+  clearDemo=()=>{if(!window.confirm('Remover o lead e os closers de demonstração? Seus próprios registros são mantidos.'))return;this.setState({leadId:null});this.commit(d=>{const ids=new Set(d.leads.filter(l=>l.demo).map(l=>l.id));d.leads=d.leads.filter(l=>!ids.has(l.id));['calls','meetings','sales','rmk','events'].forEach(k=>d[k]=d[k].filter(x=>!ids.has(x.leadId)));d.closers=d.closers.filter(c=>!c.demo||d.meetings.some(m=>m.closerId===c.id));d.closers.forEach(c=>{c.demo=false});if(d.settings.operator==='Operador (demo)')d.settings.operator='Operador'},'Dados de demonstração removidos')};
+  info(d,l,now){
+    const calls=d.calls.filter(c=>c.leadId===l.id).sort(byC),mts=d.meetings.filter(m=>m.leadId===l.id).sort(byC);
+    const lastCall=calls[calls.length-1]||null,lastM=mts[mts.length-1]||null,activeM=isAct(lastM)?lastM:null;
+    const sale=d.sales.filter(x=>x.leadId===l.id).slice(-1)[0]||null,rmk=d.rmk.filter(x=>x.leadId===l.id).slice(-1)[0]||null;
+    const closerId=(lastM&&lastM.closerId)||l.closerId||'';const T=today(),R='#B32727',P=INK;let nx;
+    if(l.commercial==='vendido')nx=['Venda fechada','#1B7A42','money'];
+    else if(l.commercial==='desqualificado')nx=['Encerrado','#6B6380','ban'];
+    else if(l.commercial==='remarketing')nx=rmk&&rmk.status==='pendente'?[(rmk.returnDate<T?'Retorno atrasado ':'Retornar em ')+kShort(rmk.returnDate),rmk.returnDate<=T?R:'#A84B08','mega']:['Remarketing','#A84B08','mega'];
+    else if(activeM)nx=activeM.scheduledAt<now?['Atualizar Raio X',R,'alert']:['Raio X em '+kShort(dKey(activeM.scheduledAt)),P,'users'];
+    else if(lastM&&lastM.status==='realizada')nx=['Definir resultado',P,'target'];
+    else if(lastM&&(lastM.status==='nao_compareceu'||lastM.status==='cancelada'))nx=['Remarcar Raio X',R,'refresh'];
+    else if(!lastCall)nx=['Agendar ligação',P,'phonePlus'];
+    else if(lastCall.status==='agendada')nx=lastCall.scheduledAt<now?['Ligação atrasada',R,'alert']:['Ligar em '+kShort(dKey(lastCall.scheduledAt)),P,'cal'];
+    else if(lastCall.status==='nao_atendeu')nx=['Tentar novamente',P,'phone'];
+    else nx=['Marcar Raio X',P,'cal'];
+    const SG=(lab,k)=>{const b=BADGE[k];return {label:lab,bg:b[1],fg:b[2]}};let stageB;
+    if(l.commercial==='vendido')stageB=SG('Vendido','vendido');else if(l.commercial==='remarketing')stageB=SG('Remarketing','remarketing');else if(l.commercial==='desqualificado')stageB=SG('Desqualificado','desqualificado');
+    else if(lastM&&lastM.status==='agendada')stageB=SG('Raio X agendado','agendada');else if(lastM&&lastM.status==='confirmada')stageB=SG('Raio X confirmado','confirmada');else if(lastM&&lastM.status==='realizada')stageB=SG('Raio X realizado','realizada');else if(lastM&&lastM.status==='nao_compareceu')stageB=SG('Não compareceu ao Raio X','nao_compareceu');else if(lastM&&lastM.status==='cancelada')stageB=SG('Raio X cancelado','cancelada');
+    else if(!lastCall)stageB=SG('Agendar ligação','nao_marcada');else if(lastCall.status==='agendada')stageB=SG('Ligação agendada','agendada');else if(lastCall.status==='nao_atendeu')stageB=SG('Reagendar ligação','nao_atendeu');else stageB=SG('Contato realizado','atendeu');
+    return {stageB,l,calls,mts,lastCall,lastM,activeM,sale,rmk,closerId,callB:bd(lastCall?lastCall.status:'sem_ligacao'),callWhen:lastCall&&lastCall.status==='agendada'?dtShort(lastCall.scheduledAt):lastCall&&lastCall.status==='nao_atendeu'?'':lastCall?dtShort(lastCall.doneAt||lastCall.scheduledAt):'—',rxB:bd(lastM?lastM.status:'nao_marcada',true),rxWhen:lastM&&lastM.status!=='cancelada'?dtShort(lastM.scheduledAt):'',next:{label:nx[0],color:nx[1],icon:ico(nx[2],nx[1]===P?GT:nx[1])}}}
+  renderVals(){
+    const s=this.state,d=s.data,f=s.f,now=nowISO(),T=today();
+    const cName=id=>{const c=d.closers.find(x=>x.id===id);return c?c.name:''};
+    const lName=id=>{const l=d.leads.find(x=>x.id===id);return l?l.name:'—'};
+    const infos=d.leads.map(l=>this.info(d,l,now));
+    const cur=s.leadId?infos.find(i=>i.l.id===s.leadId):null;
+    const view=cur?'detail':s.view;
+    const show={leads:view==='leads',na:view==='na',cal:view==='cal',rmk:view==='rmk',sales:view==='sales',ov:view==='ov',cfg:view==='cfg',detail:view==='detail'};
+    const navKey=cur?s.backTo:s.view;
+    const isNA=i=>i.lastCall&&i.lastCall.status==='nao_atendeu';const naCount=infos.filter(isNA).length;
+    const navItems=[['leads','Leads','user'],['cal','Calendário','cal'],['rmk','Remarketing','refresh'],['sales','Vendas','bars'],['ov','Visão Geral','target']].map(([k,lab,ic])=>{const a=navKey===k;return {label:lab,go:()=>this.go(k),cur:a?'page':'false',bg:a?GOLD:'transparent',bd:a?'#E6C88A':'transparent',fg:a?'#0A0A0B':'#C9C6BE',icon:ico(ic,a?'#0A0A0B':'#C9C6BE'),hasCount:k==='na'&&naCount>0,count:String(naCount)}});
+    const on={};FKEYS.forEach(k=>{on[k]=e=>this.setF(k,e.target.value)});on.nl_origin=e=>this.onOrigin('nl',e.target.value);on.ed_origin=e=>this.onOrigin('ed',e.target.value);
+    const errs={};['nl','ed','call','mx','res','cfg','rf'].forEach(k=>{errs[k]=s.errs[k]||'';errs['has'+k[0].toUpperCase()+k.slice(1)]=!!s.errs[k]});
+    const fph=l=>l.phone?((l.ddi&&l.ddi!=='55')?'+'+l.ddi+' '+l.phone:l.phone):'';
+    const av=l=>({hasPhoto:!!l.photo,noPhoto:!l.photo,photo:l.photo||'',initials:initials(l.name)});
+    const I={search:ico('search','#6B6380'),plusInk:ico('plus',INK),chev:ico('chev',GT),chevInk:ico('chev',INK),chevLInk:ico('chevL',INK),backInk:ico('back',INK),phone:ico('phone',GT),mail:ico('mail',GT),monitorInk:ico('monitor',INK),calInk:ico('cal',INK),cal:ico('cal',GT),dots:ico('dots',INK),info:ico('info',GT),checkGreen:ico('check','#1B7A42'),phoneXRed:ico('phoneX','#B32727'),pencil:ico('pencil',GT),target:ico('target',GT),list:ico('list',GT)};
+    const fdefs=[['todos','Todos','users',()=>true],['agendar','Agendar ligação','phonePlus',i=>!i.lastCall&&i.l.commercial==='andamento'],['ligacoes','Ligações agendadas','cal',i=>i.lastCall&&i.lastCall.status==='agendada'],['reagendar','Reagendar ligação','refresh',isNA],['raiox','Raio X','cal',i=>!!i.activeM],['vendidos','Vendidos','money',i=>i.l.commercial==='vendido'],['remarketing','Remarketing','mega',i=>i.l.commercial==='remarketing']];
+    const fd=fdefs.find(x=>x[0]===s.filter)||fdefs[0];
+    const q=s.search.trim().toLowerCase(),qd=q.replace(/\D/g,'');
+    const rows=infos.filter(fd[3]).filter(i=>!q||[i.l.name,i.l.city,i.l.email].some(v=>(v||'').toLowerCase().includes(q))||(qd.length>=3&&(i.l.phone||'').replace(/\D/g,'').includes(qd))).sort((a,b)=>a.l.createdAt<b.l.createdAt?1:-1).map(i=>Object.assign(av(i.l),{name:i.l.name,phone:fph(i.l)||i.l.email||'—',city:i.l.city||'—',age:i.l.age||i.l.age===0?i.l.age+' anos':'',callB:i.callB,callWhen:i.callWhen,rxB:i.rxB,rxWhen:i.rxWhen,closer:cName(i.closerId)||'—',next:i.next,open:()=>this.openLead(i.l.id),aria:'Ver lead '+i.l.name}));
+    const filters=fdefs.map(([k,lab,ic,fn])=>{const a=s.filter===k;return {label:lab,icon:ico(ic,INK),count:String(infos.filter(fn).length),pressed:a?'true':'false',bg:a?GOLD:'#FFFFFF',bd:a?'#B8892F':'#E4DDEF',cfg:a?'#3A2A12':'#6B6380',onClick:()=>this.setState({filter:k})}});
+    const odC=infos.filter(i=>i.lastCall&&i.lastCall.status==='agendada'&&i.lastCall.scheduledAt<now).length,odM=infos.filter(i=>i.activeM&&i.activeM.scheduledAt<now).length;
+    const rmkDue=infos.filter(i=>i.l.commercial==='remarketing'&&i.rmk&&i.rmk.status==='pendente'&&i.rmk.returnDate<=T).length;
+    const al=[];if(odC)al.push({text:pl(odC,'ligação atrasada','ligações atrasadas'),bg:'#FDE7E7',fg:'#9B1F1F'});if(odM)al.push({text:pl(odM,'Raio X sem atualização','Raio X sem atualização'),bg:'#FDE7E7',fg:'#9B1F1F'});if(rmkDue)al.push({text:pl(rmkDue,'retorno de remarketing vencido','retornos de remarketing vencidos'),bg:'#FFEBD8',fg:'#8A3E05'});
+    const closerOpts=d.closers.filter(c=>c.active!==false).map(c=>({id:c.id,name:c.name}));
+    const allCloserOpts=d.closers.map(c=>({id:c.id,name:c.name+(c.active===false?' (inativo)':'')}));
+    const hasDemo=d.leads.some(l=>l.demo)||d.closers.some(c=>c.demo);
+    const naInfos=infos.filter(isNA).sort((a,b)=>(a.lastCall.doneAt||'')<(b.lastCall.doneAt||'')?1:-1);
+    const hp=k=>({open:s.help===k,exp:s.help===k?'true':'false',toggle:e=>{e.preventDefault();e.stopPropagation();this.setState(st=>({help:st.help===k?null:k}))}});
+    const dl=s.dupId?infos.find(i=>i.l.id===s.dupId):null,dupShow=!!dl&&(s.dupFor==='nl'?!!s.errs.nl:!!s.errs.ed);
+    const dup=dl?Object.assign(av(dl.l),{nl:dupShow&&s.dupFor==='nl',ed:dupShow&&s.dupFor==='ed',name:dl.l.name,contact:[dl.l.phone,dl.l.email].filter(Boolean).join(' · '),view:()=>this.setState({dupView:true})}):{nl:false,ed:false};
+    const dlDup=dl;const DV=(()=>{const dl=s.viewId?infos.find(i=>i.l.id===s.viewId):(s.dupView?dlDup:null);return dl?Object.assign(av(dl.l),{open:true,seq:String(dl.l.seq||'—'),callText:'Ligação · '+dl.callB.label,rows:(()=>{const L=dl.l,ni='Não informado',isRef=L.origin==='Indicação',ct=DDIS.find(x=>x[0]===(L.ddi||'55'));const rows=[['Nº do lead',String(L.seq||'')],['Nome',L.name],['Telefone / WhatsApp',L.phone?'+'+(L.ddi||'55')+' '+L.phone:''],['Nacionalidade',(L.ddi||'55')==='55'?'Nacional (Brasil)':'Internacional'+(ct?' ('+ct[1]+')':'')],['E-mail',L.email],['Cidade',L.city],['Idade',(L.age||L.age===0)?L.age+' anos':''],['Origem',L.origin],['Foto',L.photo?'Enviada':'']];if(isRef)rows.push(['Quem indicou',L.refName],['Telefone de quem indicou',L.refPhone?'+'+(L.refDdi||'55')+' '+L.refPhone:''],['E-mail de quem indicou',L.refEmail]);rows.push(['Data de cadastro',dtStr(L.createdAt)]);return rows.map(([k,v])=>({k,v:v||ni,c:v?'#211638':'#8A829C',w:v?'600':'400'}))})(),sub:s.viewId?'Dados do lead':'Lead já cadastrado com este contato',showOpen:!s.viewId,name:dl.l.name,phone:fph(dl.l)||'—',email:dl.l.email||'—',cityAge:[dl.l.city,(dl.l.age||dl.l.age===0)?dl.l.age+' anos':''].filter(Boolean).join(' · ')||'—',origin:(dl.l.origin||'—')+(dl.l.origin==='Indicação'&&dl.l.refName?' · '+dl.l.refName:''),created:dStr(dl.l.createdAt),comB:bd(dl.l.commercial),callB:dl.callB,next:dl.next.label,close:()=>this.setState({dupView:false,viewId:null}),stop:e=>e.stopPropagation(),onKey:e=>{if(e.key==='Escape')this.setState({dupView:false,viewId:null})},openLead:()=>{const id=dl.l.id;this.setState({dupView:false,dupId:null,nlOpen:false});this.openLead(id)}}):{open:false}})();
+    const phOf=p=>(f[p+'_ddi']||'55')==='55'?'(45) 99999-0000':'Só o número';
+    const ddiQ=s.ddiQ||'',qn=norm(ddiQ).replace(/^\+/,''),list=DDIS.filter(([c,nm])=>!qn||norm(nm).includes(qn)||c.startsWith(qn.replace(/\D/g,'')||'x'));
+    const pickDdi=(p,c)=>this.setState(st=>({ddiOpen:null,ddiQ:'',f:{...st.f,[p+'_ddi']:c,[p+'_nat']:c==='55'?'nacional':'internacional'}}));
+    const dd=p=>{const code=f[p+'_ddi']||'55',ct=DDIS.find(x=>x[0]===code);return {code,codeLabel:'+'+code,name:ct?ct[1]:'',open:s.ddiOpen===p,exp:s.ddiOpen===p?'true':'false',nat:code==='55'?'Nacional (Brasil)':'Internacional'+(ct?' ('+ct[1]+')':''),toggle:e=>{e.stopPropagation();this.setState(st=>({ddiOpen:st.ddiOpen===p?null:p,ddiQ:''}))},onKey:e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();this.setState({ddiOpen:null,ddiQ:''})}else if(e.key==='Enter'){e.preventDefault();if(list[0])pickDdi(p,list[0][0])}},items:list.map(([c,nm])=>({code:c,codeLabel:'+'+c,name:nm,sel:c===code?'true':'false',bg:c===code?'#FBF3E4':'transparent',pick:()=>pickDdi(p,c)}))}};
+    const out={ddi:{focusRef:el=>{if(el&&this._ddiF!==el){this._ddiF=el;setTimeout(()=>el.focus(),0)}if(!el)this._ddiF=null},nl:dd('nl'),ed:dd('ed'),rf:dd('rf'),q:ddiQ,onQ:e=>this.setState({ddiQ:e.target.value}),empty:list.length===0,stop:e=>e.stopPropagation()},ptype:{rfPh:phOf('rf'),nlPh:phOf('nl'),edPh:phOf('ed')},dup,DV,help:{nl:hp('nl'),ed:hp('ed'),rf:hp('rf'),natNl:hp('natNl'),natEd:hp('natEd')},show,navItems,on,f,errs,I,search:s.search,onSearch:e=>this.setState({search:e.target.value}),toggleNew:()=>this.setState(st=>({nlOpen:!st.nlOpen,errs:{...st.errs,nl:''}})),nlOpen:s.nlOpen,nlClosed:!s.nlOpen,nlOpenStr:s.nlOpen?'true':'false',nlHasPhoto:!!f.nl_photo,nlNoPhoto:!f.nl_photo,nlIsRef:f.nl_origin==='Indicação',openRefNl:()=>this.openRef('nl'),openRefEd:()=>this.openRef('ed'),
+      nlRef:{show:f.nl_origin==='Indicação',hasPhoto:!!f.nl_refPhoto,photo:f.nl_refPhoto,title:f.nl_refName?'Indicado por '+f.nl_refName:'Indicação sem dados',contact:[f.nl_refPhone?((f.nl_refDdi&&f.nl_refDdi!=='55')?'+'+f.nl_refDdi+' ':'')+f.nl_refPhone:'',f.nl_refEmail].filter(Boolean).join(' · ')||'Preencha nome e telefone de quem indicou',btn:f.nl_refName?'Editar indicação':'Preencher'},
+      RM:{open:!!s.refModal,hasPhoto:!!f.rf_photo,noPhoto:!f.rf_photo,pick:e=>this.pickPhoto('rf_photo',e),rmPhoto:()=>this.setF('rf_photo',''),save:this.saveRef,cancel:this.cancelRef,stop:e=>{e.stopPropagation();if(this.state.ddiOpen==='rf'&&!e.target.closest('[role=listbox],input[aria-label^="Buscar"]'))this.setState({ddiOpen:null,ddiQ:''})},onKey:e=>{if(e.key==='Escape')this.cancelRef()}},photoNew:e=>this.pickPhoto('nl_photo',e),rmPhotoNew:()=>this.setF('nl_photo',''),createLead:this.createLead,
+      rows,noRows:rows.length===0,noRowsText:d.leads.length?'Nenhum lead neste filtro ou busca.':'Nenhum lead cadastrado. Use “Novo lead”.',filters,alerts:{has:al.length>0,list:al},
+      counts:{na:String(naCount),hasNa:naCount>0},banner:{show:hasDemo},clearDemo:this.clearDemo,closerOpts,allCloserOpts,goCfg:()=>this.go('cfg'),goCal:()=>this.go('cal'),goLeads:()=>this.go('leads'),
+      toast:{show:!!s.toast,msg:s.toast?s.toast.msg:'',bg:s.toast&&s.toast.kind==='err'?'#9B1F1F':'#0A0A0B'},back:this.back};
+    out.naSide=naInfos.slice(0,4).map(i=>Object.assign(av(i.l),{name:i.l.name,cityAge:[i.l.city,(i.l.age||i.l.age===0)?i.l.age+' anos':''].filter(Boolean).join(' • '),open:()=>this.openLead(i.l.id),aria:'Abrir '+i.l.name+' para nova ligação'}));out.naEmpty=naInfos.length===0;
+    const acts=[];infos.forEach(i=>{const n=i.l.name;if(i.lastCall&&i.lastCall.status==='agendada')acts.push({k:i.lastCall.scheduledAt,title:'Ligar para '+n,sub:i.lastCall.scheduledAt<now?'Atrasada · '+dtStr(i.lastCall.scheduledAt):dtStr(i.lastCall.scheduledAt),late:i.lastCall.scheduledAt<now,ic:'cal',id:i.l.id});if(i.activeM)acts.push({k:i.activeM.scheduledAt,title:'Raio X com '+n,sub:(i.activeM.scheduledAt<now?'Atualizar · ':'')+dtStr(i.activeM.scheduledAt),late:i.activeM.scheduledAt<now,ic:'users',id:i.l.id});if(isNA(i))acts.push({k:i.lastCall.doneAt||now,title:'Tentar contato com '+n,sub:'Pendente desde '+dtStr(i.lastCall.doneAt),late:true,ic:'phone',id:i.l.id});if(i.l.commercial==='remarketing'&&i.rmk&&i.rmk.status==='pendente')acts.push({k:toISO(i.rmk.returnDate,'09:00'),title:'Retorno: '+n,sub:kFull(i.rmk.returnDate),late:i.rmk.returnDate<T,ic:'mega',id:i.l.id})});
+    acts.sort((a,b)=>a.k<b.k?-1:1);out.nextSide=acts.slice(0,5).map(a=>({title:a.title,sub:a.sub,subColor:a.late?'#B32727':'#4A3F66',icon:ico(a.ic,GT),open:()=>this.openLead(a.id)}));out.nextEmpty=!acts.length;
+    {const mk=s.mini,first=mk,off=wd(first),evDays=new Set();d.calls.forEach(c=>{if(c.status!=='reagendada')evDays.add(dKey(c.scheduledAt))});d.meetings.forEach(m=>{if(m.status!=='reagendada')evDays.add(dKey(m.scheduledAt))});const cells=[];for(let i=0;i<off;i++)cells.push({num:'',vis:'hidden',bg:'transparent',fg:INK,fw:'400',aria:'',open:()=>{}});
+      for(let k=first;k.slice(0,7)===first.slice(0,7);k=addD(k,1)){const isT=k===T,ev=evDays.has(k),kk=k;cells.push({num:String(+k.slice(8)),vis:'visible',bg:isT?GOLD:ev?'#FBF0DA':'transparent',fg:isT?'#0A0A0B':ev?'#7A5A1E':INK,fw:isT||ev?'800':'500',aria:kFull(k)+(ev?' · com eventos':''),open:()=>this.setState({view:'cal',leadId:null,cal:{...this.state.cal,mode:'dia',anchor:kk}})})}
+      out.mini={label:MONTHS[+first.slice(5,7)-1]+' de '+first.slice(0,4),heads:['D','S','T','Q','Q','S','S'],cells,prev:()=>this.setState(st=>({mini:monthShift(st.mini,-1)})),next:()=>this.setState(st=>({mini:monthShift(st.mini,1)}))}}
+    if(cur){const l=cur.l,lc=cur.lastCall,lm=cur.lastM,am=cur.activeM,com=l.commercial;const dg=(l.phone||'').replace(/\D/g,'');
+      out.L=Object.assign(av(l),{name:l.name,photoAlt:'Foto de '+l.name,stageB:cur.stageB,hasCityAge:!!(l.city||l.age||l.age===0||l.nat==='internacional'),seq:String(l.seq||'—'),phone:fph(l)||'Sem telefone',email:l.email||'Sem e-mail',cityAge:[l.city,(l.age||l.age===0)?l.age+' anos':'',l.nat==='internacional'?'Internacional':''].filter(Boolean).join(' • '),origin:(l.origin||'—')+(l.origin==='Indicação'&&l.refName?' · '+l.refName+(l.refPhone?' ('+l.refPhone+')':''):''),created:dStr(l.createdAt),comB:bd(com),hasWa:dg.length>=10,wa:'https://wa.me/'+(l.ddi||'55')+dg,editing:s.editing,editingStr:s.editing?'true':'false',hasEdPhoto:!!f.ed_photo,noEdPhoto:!f.ed_photo,edIsRef:f.ed_origin==='Indicação',edRef:{show:f.ed_origin==='Indicação',hasPhoto:!!f.ed_refPhoto,photo:f.ed_refPhoto,title:f.ed_refName?'Indicado por '+f.ed_refName:'Indicação sem dados',contact:[f.ed_refPhone?((f.ed_refDdi&&f.ed_refDdi!=='55')?'+'+f.ed_refDdi+' ':'')+f.ed_refPhone:'',f.ed_refEmail].filter(Boolean).join(' · ')||'Preencha nome e telefone de quem indicou',btn:f.ed_refName?'Editar indicação':'Preencher'}});
+      out.toggleEdit=()=>this.setState(st=>({editing:!st.editing,errs:{...st.errs,ed:''},f:{...st.f,ed_name:l.name,ed_phone:l.phone||'',ed_ddi:l.ddi||'55',ed_nat:(l.ddi||'55')==='55'?'nacional':'internacional',ed_email:l.email||'',ed_city:l.city||'',ed_age:(l.age||l.age===0)?String(l.age):'',ed_origin:l.origin||'',ed_refName:l.refName||'',ed_refPhone:l.refPhone||'',ed_refEmail:l.refEmail||'',ed_refDdi:l.refDdi||'55',ed_refPhoto:l.refPhoto||'',ed_photo:l.photo||''}}));
+      out.saveEdit=this.saveEdit;out.viewLead=()=>this.setState({viewId:l.id});out.photoEd=e=>this.pickPhoto('ed_photo',e);out.rmPhotoEd=()=>this.setF('ed_photo','');
+      const ce=!!s.callEdit&&!!lc&&(lc.status==='atendeu'||lc.status==='nao_atendeu');const sched=!!lc&&lc.status==='agendada',can=!lc;
+      const note=!lc?'':lc.status==='nao_atendeu'?'O lead não atendeu em '+dtStr(lc.doneAt)+' ('+lc.reason+').':lc.status==='atendeu'?'Contato realizado em '+dtStr(lc.doneAt)+'.':'';
+      out.C={b:bd(lc?lc.status:'sem_ligacao'),showInputs:sched||can||ce,editing:ce,note,hasNote:!!note,canUndo:!!lc&&(lc.status==='atendeu'||lc.status==='nao_atendeu'),isScheduled:sched||ce,overdue:sched&&lc.scheduledAt<now,modeNA:s.callMode==='na',modeRS:s.callMode==='rs',modeNAStr:s.callMode==='na'?'true':'false',modeRSStr:s.callMode==='rs'?'true':'false',naOther:f.naReason==='Outro',
+        canSchedule:can&&!ce,scheduleLabel:lc?'Reagendar ligação':'Salvar agendamento',attempts:cur.calls.slice().reverse().map(c=>({b:bd(c.status),when:dtStr(c.scheduledAt),reason:c.reason?'Motivo: '+c.reason:''})),hasAttempts:cur.calls.length>1,attemptsCount:String(cur.calls.length)};
+      out.modeNA=()=>this.setState(st=>({callMode:st.callMode==='na'?null:'na',errs:{...st.errs,call:''}}));out.modeRS=()=>this.setState(st=>({callMode:st.callMode==='rs'?null:'rs',errs:{...st.errs,call:''}}));out.modeOff=()=>this.setState(st=>({callMode:null,errs:{...st.errs,call:''},f:{...st.f,...pre(st.data,l.id)}}));
+      out.callAnswered=this.callAnswered;out.callEditOff=()=>this.setState(st=>({callEdit:false,callMode:null,errs:{...st.errs,call:''},f:{...st.f,...pre(st.data,l.id)}}));out.callUndo=this.callUndo;out.callNotAnswered=this.callNotAnswered;out.callReschedule=this.callReschedule;out.scheduleCall=this.scheduleCall;
+      const dirty=(l.summary||'')!==f.summary;out.S={status:dirty?'Alterações não salvas':(l.summary?'Salvo':'Ainda sem resumo'),color:dirty?'#A84B08':'#6B6380'};out.saveSummary=this.saveSummary;
+      const showForm=!!am||(!(lm&&lm.status==='realizada')&&com!=='vendido'&&com!=='desqualificado'&&closerOpts.length>0);
+      const rs=f.mxStatus==='reagendada';
+      out.X={b:bd(lm?lm.status:'nao_marcada',true),hasSummary:!!lm&&!am,summary:lm?dtStr(lm.scheduledAt)+' · '+(cName(lm.closerId)||'—')+(lm.status==='realizada'&&lm.doneAt?' · efetivo '+dtStr(lm.doneAt):'')+(lm.reason?' · '+lm.reason:''):'',
+        showForm,active:!!am,notActive:!am,lock:!!am&&!rs,hasDur:!am,isResched:!!am&&rs,isDone:!!am&&f.mxStatus==='realizada',needReason:!!am&&['nao_compareceu','cancelada','reagendada'].includes(f.mxStatus),overdue:!!am&&am.scheduledAt<now,
+        action:am?this.updateMeeting:this.scheduleMeeting,actionLabel:am?'Salvar status':(lm?'Marcar novo Raio X':'Marcar Raio X'),noClosers:!am&&closerOpts.length===0,
+        history:cur.mts.slice().reverse().map(m=>({b:bd(m.status,true),when:dtStr(m.scheduledAt),closer:cName(m.closerId)||'—',reason:m.reason?'Motivo: '+m.reason:(m.doneAt?'Efetiva: '+dtStr(m.doneAt):'')})),hasHistory:cur.mts.length>1,count:String(cur.mts.length)};
+      const rk=cur.rmk,curText=com==='remarketing'&&rk?'Atual: remarketing · '+rk.reason+' · retorno '+kFull(rk.returnDate):com==='desqualificado'?'Atual: desqualificado · '+(l.dqReason||''):'';
+      out.R={isSold:com==='vendido'&&!!cur.sale,soldTitle:cur.sale?'Vendido · '+brl(cur.sale.amount):'',soldText:cur.sale?'Fechamento em '+dStr(cur.sale.closedAt)+' · '+cur.sale.method+(cName(cur.sale.closerId)?' · Closer '+cName(cur.sale.closerId):''):'',editable:com!=='vendido',curText,hasCurText:!!curText,changed:f.res!==com,
+        opts:[['andamento','Em andamento'],['vendido','Vendido'],['remarketing','Remarketing'],['desqualificado','Desqualificado']].map(([k,lab])=>{const a=f.res===k;return {label:lab,pressed:a?'true':'false',ring:a?'#B8892F':'#C9C3D6',dot:a?'#B8892F':'transparent',fw:a?'800':'500',onClick:()=>this.setState(st=>({f:{...st.f,res:k},errs:{...st.errs,res:''}}))}}),
+        showSale:f.res==='vendido',showRmk:f.res==='remarketing',showDq:f.res==='desqualificado'&&com!=='desqualificado'};
+      out.saveResult=this.saveResult;
+      const ligClick=()=>{const done=lc&&(lc.status==='atendeu'||lc.status==='nao_atendeu');if(!done)return this.setState({leadTab:'lig'});if(s.callEdit&&(s.leadTab||'lig')==='lig')return this.setState(st=>({callEdit:false,callMode:null,errs:{...st.errs,call:''},f:{...st.f,...pre(st.data,l.id)}}));if(lc.status==='atendeu'&&d.meetings.some(m=>m.leadId===l.id&&m.createdAt>lc.doneAt)){this.setState({leadTab:'lig'});return this.toast('Não é possível alterar o resultado: já existe Raio X marcado depois deste contato.','err')}this.setState(st=>({leadTab:'lig',callEdit:true,callMode:null,errs:{...st.errs,call:''},f:{...st.f,callDate:dKey(lc.scheduledAt),callTime:tStr(lc.scheduledAt)}}))};
+      const tabOf=k=>{const a=(s.leadTab||'lig')===k;return a};const lB=cur.callB,xB=bd(lm?lm.status:'nao_marcada',true);
+      out.TB={lig:tabOf('lig'),rx:tabOf('rx'),items:[['lig','Ligação','phone',lB],['rx','Raio X','cal',xB]].map(([k,lab,ic,b])=>{const a=tabOf(k);return {label:lab,icon:ico(ic,a?INK:GT),sel:a?'true':'false',bg:a?GOLD:'#FFFFFF',bd:a?'#B8892F':'transparent',fw:a?'800':'700',status:b.label,sb:b.bg,sf:b.fg,onClick:k==='lig'?ligClick:()=>this.setState({leadTab:k})}})};
+      out.HT={open:!!s.histOpen,exp:s.histOpen?'true':'false',label:(s.histOpen?'Ocultar histórico':'Ver histórico')+' ('+d.events.filter(e=>e.leadId===l.id).length+')',rot:s.histOpen?'rotate(180deg)':'none',toggle:()=>this.setState(st=>({histOpen:!st.histOpen}))};
+      out.H=d.events.filter(e=>e.leadId===l.id).sort((a,b)=>a.at<b.at?1:-1).map(e=>{const det=[e.from&&e.to?'De '+e.from+' para '+e.to:e.to?'Para '+e.to:e.from?'Antes: '+e.from:'',e.reason?'Motivo: '+e.reason:'',e.detail].filter(Boolean).join(' · ');return {when:dtStr(e.at),text:e.text,detail:det,hasDetail:!!det,author:e.author}});
+    }
+    out.naRows=naInfos.map(i=>({name:i.l.name,phone:i.l.phone||i.l.email||'—',attempts:String(i.calls.filter(c=>c.status==='nao_atendeu').length),last:dtStr(i.lastCall.doneAt||i.lastCall.scheduledAt),reason:i.lastCall.reason||'—',open:()=>this.openLead(i.l.id)}));
+    out.rmkRows=infos.filter(i=>i.l.commercial==='remarketing'&&i.rmk).sort((a,b)=>a.rmk.returnDate<b.rmk.returnDate?-1:1).map(i=>{const r=i.rmk,pend=r.status==='pendente';return {name:i.l.name,phone:i.l.phone||i.l.email||'—',reason:r.reason,ret:kFull(r.returnDate),retColor:pend&&r.returnDate<T?'#B32727':pend&&r.returnDate===T?'#A84B08':INK,retNote:pend?(r.returnDate<T?'Atrasado':r.returnDate===T?'Hoje':''):'',b:bd(r.status),canContact:pend,contact:()=>this.rmkContact(i.l.id),open:()=>this.openLead(i.l.id)}});out.rmkEmpty=out.rmkRows.length===0;
+    const sr=d.sales.slice().sort((a,b)=>a.closedAt<b.closedAt?1:-1);
+    out.sales={rows:sr.map(x=>({name:lName(x.leadId),date:dStr(x.closedAt),amount:brl(x.amount),method:x.method,closer:cName(x.closerId)||'—',open:()=>this.openLead(x.leadId)})),count:String(sr.length),total:brl(sr.reduce((t,x)=>t+x.amount,0)),empty:sr.length===0};
+    if(show.cal){const c=s.cal,cf=c.closer,evs=[];
+      if(cf==='all')d.calls.forEach(x=>{if(x.status==='reagendada')return;evs.push({iso:x.scheduledAt,leadId:x.leadId,kind:'Ligação',sub:bd(x.status).label,dot:'#B8892F',bg:'#FBF3E4'})});
+      d.meetings.forEach(m=>{if(m.status==='reagendada')return;if(cf!=='all'&&m.closerId!==cf)return;evs.push({iso:m.scheduledAt,leadId:m.leadId,kind:'Raio X',sub:bd(m.status).label+' · '+(cName(m.closerId)||'—'),dot:'#5D3594',bg:'#F3ECFD'})});
+      evs.sort((a,b)=>a.iso<b.iso?-1:1);const by={};
+      evs.forEach(e=>{e.day=dKey(e.iso);e.time=tStr(e.iso);e.name=lName(e.leadId);e.short=e.kind==='Raio X'?'RX '+e.name.split(' ')[0]:e.name.split(' ')[0];e.aria=e.time+', '+e.kind+', '+e.name+', '+e.sub;e.open=()=>this.openLead(e.leadId);(by[e.day]=by[e.day]||[]).push(e)});
+      const setCal=o=>this.setState(st=>({cal:{...st.cal,...o}}));const a=c.anchor;
+      const shift=n=>this.setState(st=>{const k=st.cal.anchor,m=st.cal.mode;return {cal:{...st.cal,anchor:m==='dia'?addD(k,n):m==='semana'?addD(k,7*n):monthShift(k,n)}}});
+      const cal={modes:[['dia','Dia'],['semana','Semana'],['mes','Mês']].map(([k,lab])=>({label:lab,pressed:c.mode===k?'true':'false',bg:c.mode===k?GOLD:'transparent',onClick:()=>setCal({mode:k})})),prev:()=>shift(-1),next:()=>shift(1),today:()=>setCal({anchor:T}),closer:cf,onCloser:e=>setCal({closer:e.target.value}),filtered:cf!=='all',isDay:c.mode==='dia',isWeek:c.mode==='semana',isMonth:c.mode==='mes'};
+      if(c.mode==='dia'){cal.label=WDL[wd(a)]+', '+kFull(a);cal.dayEvents=by[a]||[];cal.dayEmpty=!cal.dayEvents.length}
+      else if(c.mode==='semana'){const st=monday(a);cal.label=kFull(st)+' – '+kFull(addD(st,6));cal.week=[0,1,2,3,4,5,6].map(i=>{const k=addD(st,i);return {label:WD[wd(k)]+' '+kShort(k),hbg:k===T?GOLD:'#F4F0FB',events:by[k]||[],openDay:()=>setCal({mode:'dia',anchor:k})}})}
+      else{const first=a.slice(0,8)+'01',gs=monday(first),mm=first.slice(0,7);cal.label=MONTHS[+first.slice(5,7)-1]+' de '+first.slice(0,4);cal.wdNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];cal.weeks=[];
+        for(let w=0;w<6;w++){if(w>0&&addD(gs,w*7).slice(0,7)!==mm)break;const days=[];for(let i=0;i<7;i++){const k=addD(gs,w*7+i),ev=by[k]||[],inM=k.slice(0,7)===mm;days.push({num:String(+k.slice(8)),numColor:k===T?GT:inM?INK:'#A79FB8',bg:k===T?'#FBF3E4':inM?'#FFFFFF':'#FBFAFD',events:ev.slice(0,3),hasMore:ev.length>3,more:'+'+(ev.length-3)+' mais',aria:'Abrir dia '+kFull(k),openDay:()=>setCal({mode:'dia',anchor:k})})}cal.weeks.push({days})}}
+      out.cal=cal}
+    if(show.ov)out.OV=this.ov(d,now,T,lName);
+    if(show.cfg)out.cfg={op:s.opName,onOp:e=>this.setState({opName:e.target.value}),saveOp:()=>{const v=s.opName.trim();if(!v)return this.setErr('cfg','Informe o nome do operador.');this.commit(x=>{x.settings.operator=v},'Operador salvo','cfg')},newName:s.closerNew,onNew:e=>this.setState({closerNew:e.target.value}),
+      add:()=>{const v=s.closerNew.trim();if(v.length<2)return this.setErr('cfg','Informe o nome do closer.');if(d.closers.some(c=>c.name.toLowerCase()===v.toLowerCase()))return this.setErr('cfg','Já existe um closer com esse nome.');if(this.commit(x=>{x.closers.push({id:uid(),name:v,active:true,demo:false})},'Closer adicionado','cfg'))this.setState({closerNew:''})},
+      closers:d.closers.map(c=>{const n=d.meetings.filter(m=>m.closerId===c.id).length;return {name:c.name+(c.demo?' (demo)':''),meta:(c.active===false?'Inativo · ':'')+pl(n,'reunião','reuniões'),toggleLabel:c.active===false?'Reativar':'Desativar',toggle:()=>this.commit(x=>{const y=x.closers.find(z=>z.id===c.id);y.active=y.active===false},'Closer atualizado'),canRemove:n===0,remove:()=>this.commit(x=>{x.closers=x.closers.filter(z=>z.id!==c.id)},'Closer removido')}}),
+      storage:(s.storageOk?'Os dados estão salvos no armazenamento local deste navegador (chave “'+KEY+'”). ':'Armazenamento local indisponível: os dados se perdem ao recarregar. ')+'É persistência de protótipo: não é compartilhada entre dispositivos ou usuários e não substitui um banco de dados de produção.',
+      reseed:()=>{if(!window.confirm('Substituir todos os dados atuais pela demonstração?'))return;const n=seed();this.setState({leadId:null,opName:n.settings.operator});this.commit(x=>{Object.keys(x).forEach(k=>delete x[k]);Object.assign(x,n)},'Demonstração recarregada')},
+      wipe:()=>{if(!window.confirm('Apagar TODOS os leads, atividades, vendas e closers? Esta ação não pode ser desfeita.'))return;this.setState({leadId:null});this.commit(x=>{x.closers=[];x.leads=[];x.calls=[];x.meetings=[];x.sales=[];x.rmk=[];x.events=[]},'Dados apagados')},
+      exportJson:()=>{const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='crm-closer-'+T+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}};
+    return out;
+  }
+  ov(d,now,T,lName){const o=this.state.ov;let a,b,err='';
+    if(o.period==='hoje'){a=b=T}else if(o.period==='semana'){a=monday(T);b=addD(a,6)}else if(o.period==='mes'){a=T.slice(0,8)+'01';b=addD(monthShift(T,1),-1)}else{a=o.from;b=o.to;if(!a||!b){err='Informe as duas datas.';a=a||T;b=b||T}else if(a>b){err='Data inicial posterior à final; período invertido.';const t=a;a=b;b=t}}
+    const inK=k=>!!k&&k>=a&&k<=b,inR=iso=>!!iso&&inK(dKey(iso));const cf=o.closer,mOK=m=>cf==='all'||m.closerId===cf;
+    const leadOK=id=>{if(cf==='all')return true;const l=d.leads.find(x=>x.id===id);return (l&&l.closerId===cf)||d.meetings.some(m=>m.leadId===id&&m.closerId===cf)};
+    const ms=d.meetings.filter(mOK);
+    const leadsN=d.leads.filter(l=>inR(l.createdAt)&&leadOK(l.id)).length;
+    const callsDone=d.calls.filter(c=>c.doneAt&&inR(c.doneAt)&&leadOK(c.leadId)),answered=callsDone.filter(c=>c.status==='atendeu').length;
+    const sched=ms.filter(m=>m.status!=='reagendada'&&inR(m.scheduledAt)),resched=ms.filter(m=>m.status==='reagendada'&&inR(m.scheduledAt)).length;
+    const done=ms.filter(m=>m.status==='realizada'&&inR(m.doneAt)),noShow=ms.filter(m=>m.status==='nao_compareceu'&&inR(m.scheduledAt)).length,doneBS=ms.filter(m=>m.status==='realizada'&&inR(m.scheduledAt)).length;
+    const cancel=ms.filter(m=>m.status==='cancelada'&&inR(m.scheduledAt)).length,pend=ms.filter(m=>isAct(m)&&inR(m.scheduledAt)&&m.scheduledAt<now).length,fut=ms.filter(m=>isAct(m)&&inR(m.scheduledAt)&&m.scheduledAt>=now).length;
+    const sales=d.sales.filter(x=>inR(x.closedAt)&&(cf==='all'||x.closerId===cf)),rev=sales.reduce((t,x)=>t+x.amount,0);
+    const coh=new Set(done.map(m=>m.id)),attr=d.sales.filter(x=>coh.has(x.meetingId)).length;
+    const rmkNew=d.rmk.filter(r=>inR(r.createdAt)&&leadOK(r.leadId)),rets=d.rmk.filter(r=>r.status==='pendente'&&inK(r.returnDate)&&leadOK(r.leadId));
+    const metrics=[{label:'Leads criados',value:String(leadsN),sub:'Pela data de cadastro'},{label:'Ligações realizadas',value:String(callsDone.length),sub:answered+' atendidas · '+(callsDone.length-answered)+' não atendidas'},{label:'Raio X marcados',value:String(sched.length),sub:'Pela data marcada · '+pl(resched,'reagendamento não duplicado','reagendamentos não duplicados')},{label:'Raio X realizados',value:String(done.length),sub:'Pela data efetiva'},{label:'Faltas',value:String(noShow),sub:'Não compareceu · pela data marcada'},{label:'Vendas fechadas',value:String(sales.length),sub:'Pela data de fechamento'},{label:'Faturamento registrado',value:brl(rev),sub:'Soma dos valores das vendas'},{label:'Remarketing',value:String(rmkNew.length),sub:'Enviados · '+pl(rets.length,'retorno previsto','retornos previstos')}];
+    const attDen=doneBS+noShow;
+    const rates=[{label:'Taxa de comparecimento',value:pct(doneBS,attDen),formula:doneBS+' realizados ÷ '+attDen+' com comparecimento esperado',note:'Fora do cálculo: '+cancel+' cancelados, '+resched+' substituídos por reagendamento, '+fut+' futuros, '+pend+' pendentes de atualização.'},{label:'Taxa de fechamento (coorte)',value:pct(attr,done.length),formula:attr+' vendas atribuídas ÷ '+done.length+' Raio X realizados',note:'Coorte: Raio X realizados no período; a venda conta quando vinculada à reunião, mesmo se fechada depois. Vendas fechadas no período: '+sales.length+'.'}];
+    const days=[];for(let k=a;k<=b&&days.length<400;k=addD(k,1))days.push(k);
+    const groups=[];if(days.length>31){for(let i=0;i<days.length;i+=7)groups.push(days.slice(i,i+7))}else days.forEach(k=>groups.push([k]));
+    const mk=ms.filter(m=>m.status!=='reagendada').map(m=>dKey(m.scheduledAt)),dk=ms.filter(m=>m.status==='realizada'&&m.doneAt).map(m=>dKey(m.doneAt));
+    const bk=groups.map(g=>{const st=new Set(g);return {label:kShort(g[0]),sc:mk.filter(k=>st.has(k)).length,dn:dk.filter(k=>st.has(k)).length,wk:g.length>1}});
+    const mx=Math.max(1,...bk.map(x=>Math.max(x.sc,x.dn))),step=Math.ceil(bk.length/12);
+    const buckets=bk.map((x,i)=>({label:i%step===0?x.label:'',h1:(x.sc/mx*100)+'%',h2:(x.dn/mx*100)+'%',t:(x.wk?'Semana de ':'')+x.label+': '+x.sc+' marcados, '+x.dn+' realizados'}));
+    const pc={};sales.forEach(x=>pc[x.method]=(pc[x.method]||0)+1);const pmax=Math.max(1,...METHODS.map(m=>pc[m]||0)),top=METHODS.filter(m=>pc[m]).sort((x,y)=>pc[y]-pc[x]);
+    const rc={};rmkNew.forEach(r=>rc[r.reason]=(rc[r.reason]||0)+1);
+    const per=[['hoje','Hoje'],['semana','Semana'],['mes','Mês'],['custom','Personalizado']].map(([k,lab])=>{const on=o.period===k;return {label:lab,pressed:on?'true':'false',bg:on?GOLD:'#FFFFFF',bd:on?'#B8892F':'#E4DDEF',onClick:()=>this.setState(st=>({ov:{...st.ov,period:k}}))}});
+    return {periods:per,isCustom:o.period==='custom',from:o.from,to:o.to,onFrom:e=>{const v=e.target.value;this.setState(st=>({ov:{...st.ov,from:v}}))},onTo:e=>{const v=e.target.value;this.setState(st=>({ov:{...st.ov,to:v}}))},closer:cf,onCloser:e=>{const v=e.target.value;this.setState(st=>({ov:{...st.ov,closer:v}}))},
+      label:a===b?kFull(a):kFull(a)+' – '+kFull(b),err,hasErr:!!err,metrics,rates,buckets,chartMin:(buckets.length*24)+'px',chartEmpty:bk.every(x=>!x.sc&&!x.dn),
+      pay:METHODS.map(m=>({name:m,count:String(pc[m]||0),w:((pc[m]||0)/pmax*100)+'%'})),topMethod:top.length?top[0]+' ('+pc[top[0]]+')':'— (sem vendas no período)',
+      reasons:Object.keys(rc).sort((x,y)=>rc[y]-rc[x]).map(k=>({name:k,count:String(rc[k])})),noReasons:!Object.keys(rc).length,
+      returns:rets.sort((x,y)=>x.returnDate<y.returnDate?-1:1).map(r=>({name:lName(r.leadId),date:kFull(r.returnDate),open:()=>this.openLead(r.leadId)})),noReturns:!rets.length};
+  }
+}
+</script>
+</body>
+</html>
